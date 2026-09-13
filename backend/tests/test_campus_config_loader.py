@@ -44,6 +44,7 @@ gates:
     name: Gate 1
     coordinates: { lat: 12.0, lng: 77.0 }
     capacity: 10
+    provenance: SAMPLE
 parking_lots: []
 destinations: []
 roads: []

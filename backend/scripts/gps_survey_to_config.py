@@ -152,6 +152,7 @@ def convert(gpx_path: Path, csv_path: Path, campus_id: str, campus_name: str, ti
                     "coordinates": {"lat": lat, "lng": lng},
                     "capacity": row["capacity"],
                     "status": row["status"],
+                    "provenance": "REAL",
                 }
             )
 
@@ -171,6 +172,7 @@ def convert(gpx_path: Path, csv_path: Path, campus_id: str, campus_name: str, ti
                     "searchable_aliases": row["searchable_aliases"],
                     "nearest_gates": row["nearest_gates"],
                     "nearest_parking_lots": row["nearest_parking_lots"],
+                    "provenance": "REAL",
                 }
             )
 
@@ -204,6 +206,7 @@ def convert(gpx_path: Path, csv_path: Path, campus_id: str, campus_name: str, ti
                     "reserved_capacity": row["reserved_capacity"],
                     "restricted_capacity": row["restricted_capacity"],
                     "temporarily_unavailable_capacity": row["temporarily_unavailable_capacity"],
+                    "provenance": "REAL",
                 }
             )
 
@@ -238,6 +241,7 @@ def convert(gpx_path: Path, csv_path: Path, campus_id: str, campus_name: str, ti
                     "is_driveable": row["is_driveable"],
                     "status": row["status"],
                     "geometry": _points_to_coords(track_points),
+                    "provenance": "REAL",
                 }
             )
 

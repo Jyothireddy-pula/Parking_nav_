@@ -30,4 +30,7 @@ class ParkingLot(Base, TimestampMixin):
     restricted_capacity: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     temporarily_unavailable_capacity: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
+    # REAL or SAMPLE only — never EXTERNAL_MAP_REFERENCE, since capacity can
+    # never come from a map source (see app.models.provenance).
+    provenance: Mapped[str] = mapped_column(String(32), nullable=False)
     configuration_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

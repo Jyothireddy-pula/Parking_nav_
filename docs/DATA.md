@@ -52,6 +52,20 @@ conversion and stamps every feature `EXTERNAL_MAP_REFERENCE`. Steps 2–3
 this skeleton does not change that requirement, it just gives the walk
 something real to start from instead of nothing.
 
+`EXTERNAL_MAP_REFERENCE` is now an enforced Module 1 schema value, not
+just a documentation convention: every gate, road, and destination
+carries a required `provenance` field (`REAL` / `EXTERNAL_MAP_REFERENCE`
+/ `SAMPLE`), and parking lots specifically reject
+`EXTERNAL_MAP_REFERENCE` outright — capacity can never come from a map
+source, so the schema won't accept that provenance value for a lot at
+all (`app/config_loader/schema.py`, `app/models/provenance.py`). The 11
+real named buildings this Overpass pull found are captured as an actual
+`CampusConfigFile`-shaped candidate at
+`configs/campuses/vitap/real_survey/vitap_candidate.yaml` — every entity
+parses correctly, but loading it for real correctly fails Module 1's
+orphan-node check, because nothing connects those buildings yet. See
+that directory's `README.md`.
+
 ## Step 2 — GPS walk survey (produces REAL coordinates)
 
 Conducted the same week, the same physical walk, as Module 2's field

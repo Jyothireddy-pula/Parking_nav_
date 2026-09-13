@@ -6,6 +6,7 @@ from app.models.destination import DESTINATION_CATEGORIES
 from app.models.event import EVENT_STATUSES
 from app.models.gate import GATE_STATUSES
 from app.models.parking_lot import PARKING_LOT_STATUSES
+from app.models.provenance import CONFIG_PROVENANCE_LABELS
 from app.models.road import ROAD_STATUSES
 
 
@@ -20,12 +21,20 @@ class GateConfig(BaseModel):
     coordinates: Coordinates
     capacity: int = Field(ge=0)
     status: str = "open"
+    provenance: str
 
     @field_validator("status")
     @classmethod
     def _valid_status(cls, value: str) -> str:
         if value not in GATE_STATUSES:
             raise ValueError(f"gate status must be one of {GATE_STATUSES}, got {value!r}")
+        return value
+
+    @field_validator("provenance")
+    @classmethod
+    def _valid_provenance(cls, value: str) -> str:
+        if value not in CONFIG_PROVENANCE_LABELS:
+            raise ValueError(f"provenance must be one of {CONFIG_PROVENANCE_LABELS}, got {value!r}")
         return value
 
 
@@ -40,12 +49,20 @@ class RoadConfig(BaseModel):
     is_driveable: bool = False
     status: str = "open"
     geometry: list[Coordinates]
+    provenance: str
 
     @field_validator("status")
     @classmethod
     def _valid_status(cls, value: str) -> str:
         if value not in ROAD_STATUSES:
             raise ValueError(f"road status must be one of {ROAD_STATUSES}, got {value!r}")
+        return value
+
+    @field_validator("provenance")
+    @classmethod
+    def _valid_provenance(cls, value: str) -> str:
+        if value not in CONFIG_PROVENANCE_LABELS:
+            raise ValueError(f"provenance must be one of {CONFIG_PROVENANCE_LABELS}, got {value!r}")
         return value
 
     @model_validator(mode="after")
@@ -80,12 +97,25 @@ class ParkingLotConfig(BaseModel):
     # not every lot has been surveyed yet.
     center: Coordinates | None = None
     geometry: list[Coordinates] | None = None
+    provenance: str
 
     @field_validator("status")
     @classmethod
     def _valid_status(cls, value: str) -> str:
         if value not in PARKING_LOT_STATUSES:
             raise ValueError(f"parking lot status must be one of {PARKING_LOT_STATUSES}, got {value!r}")
+        return value
+
+    @field_validator("provenance")
+    @classmethod
+    def _valid_provenance(cls, value: str) -> str:
+        if value not in CONFIG_PROVENANCE_LABELS:
+            raise ValueError(f"provenance must be one of {CONFIG_PROVENANCE_LABELS}, got {value!r}")
+        if value == "EXTERNAL_MAP_REFERENCE":
+            raise ValueError(
+                "parking lot capacity can never come from a map source — provenance must be "
+                "REAL (physical count) or SAMPLE, never EXTERNAL_MAP_REFERENCE"
+            )
         return value
 
     @model_validator(mode="after")
@@ -122,12 +152,20 @@ class DestinationConfig(BaseModel):
     searchable_aliases: list[str] = Field(default_factory=list)
     nearest_gates: list[str] = Field(default_factory=list)
     nearest_parking_lots: list[str] = Field(default_factory=list)
+    provenance: str
 
     @field_validator("category")
     @classmethod
     def _valid_category(cls, value: str) -> str:
         if value not in DESTINATION_CATEGORIES:
             raise ValueError(f"destination category must be one of {DESTINATION_CATEGORIES}, got {value!r}")
+        return value
+
+    @field_validator("provenance")
+    @classmethod
+    def _valid_provenance(cls, value: str) -> str:
+        if value not in CONFIG_PROVENANCE_LABELS:
+            raise ValueError(f"provenance must be one of {CONFIG_PROVENANCE_LABELS}, got {value!r}")
         return value
 
 

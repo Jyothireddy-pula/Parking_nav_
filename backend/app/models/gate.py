@@ -16,4 +16,6 @@ class Gate(Base, TimestampMixin):
     longitude: Mapped[float] = mapped_column(Float, nullable=False)
     capacity: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="open")
+    # REAL / EXTERNAL_MAP_REFERENCE / SAMPLE — see app.models.provenance.
+    provenance: Mapped[str] = mapped_column(String(32), nullable=False)
     configuration_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

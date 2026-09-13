@@ -1,0 +1,143 @@
+# VIT-AP — REAL DATA, NOT YET LOADABLE. Do not copy this into
+# configs/campuses/vitap.yaml or run load_campus_config.py against it.
+#
+# Every coordinate and name below is real: pulled from the live Overpass
+# API against OpenStreetMap on 2026-09-13 (see osm_reference/), not typed
+# in or estimated. Every entity is honestly labeled provenance:
+# EXTERNAL_MAP_REFERENCE — real, but not yet GPS-walk/satellite-verified
+# (Module 1B Steps 2-3).
+#
+# This file intentionally has no gates, no parking_lots, and no roads:
+# OSM has zero gates for this campus, zero named/capacitied parking
+# lots (capacity can never come from a map source anyway — see
+# app/models/provenance.py), and while ~100 road/path ways exist in the
+# OSM pull, none of them reliably connect two of these named buildings
+# without approximating adjacency — see osm_reference/README.md for the
+# one weak candidate found (MH-2 <-> MH-2 Food Store, ~22-29m away at
+# each end) and why it wasn't used here. Inventing a connection to make
+# this pass Module 1's orphan-node check would be exactly the kind of
+# fabrication this project's rules forbid.
+#
+# Loading this as-is through Module 1's real loader will correctly FAIL
+# with an orphan-node error for every destination below — see
+# backend/tests/test_vitap_candidate_config.py, which asserts that
+# failure on purpose. That failure is the honest, current status: real
+# names and real coordinates exist, but the campus isn't walkable/
+# connected/capacitied yet. The physical GPS walk (Module 1B Steps 2-3)
+# is what turns this into a real, loadable, REAL-provenance config —
+# see real_survey/README.md for what that walk still needs to capture.
+
+campus_id: vitap
+name: VIT-AP University
+description: >
+  Real building names and coordinates pulled from OpenStreetMap via the
+  Overpass API. Not yet GPS-walk verified. No gates, parking lots, or
+  roads exist yet for this campus — see the note above.
+timezone: Asia/Kolkata
+
+gates: []
+parking_lots: []
+roads: []
+
+destinations:
+  - destination_id: vitap-osm-1485919486
+    name: AB-1
+    category: academic_block
+    coordinates: { lat: 16.495673, lng: 80.500528 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: []
+    nearest_parking_lots: []
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-750542242
+    name: AB-2
+    category: academic_block
+    coordinates: { lat: 16.495620, lng: 80.498022 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: []
+    nearest_parking_lots: []
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1255690439
+    name: CB
+    category: administrative_building
+    coordinates: { lat: 16.494387, lng: 80.499217 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: []
+    nearest_parking_lots: []
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1321555307
+    name: Food Street
+    category: cafeteria
+    coordinates: { lat: 16.493761, lng: 80.498390 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: []
+    nearest_parking_lots: []
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1434460208
+    name: MH-1
+    category: hostel
+    coordinates: { lat: 16.494185, lng: 80.500627 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: []
+    nearest_parking_lots: []
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1434460210
+    name: MH-2
+    category: hostel
+    coordinates: { lat: 16.493550, lng: 80.501323 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: []
+    nearest_parking_lots: []
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1434908865
+    name: MH-2 Food Store
+    category: cafeteria
+    coordinates: { lat: 16.493774, lng: 80.500964 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: []
+    nearest_parking_lots: []
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1434460214
+    name: MH-3
+    category: hostel
+    coordinates: { lat: 16.492118, lng: 80.501363 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: []
+    nearest_parking_lots: []
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1434890457
+    name: MH-6
+    category: hostel
+    coordinates: { lat: 16.491991, lng: 80.499746 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: []
+    nearest_parking_lots: []
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1485935404
+    name: MH-7
+    category: hostel
+    coordinates: { lat: 16.492680, lng: 80.500436 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: []
+    nearest_parking_lots: []
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1485935405
+    name: LH-1
+    category: hostel
+    coordinates: { lat: 16.491970, lng: 80.496657 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: []
+    nearest_parking_lots: []
+    provenance: EXTERNAL_MAP_REFERENCE
+
+events: []

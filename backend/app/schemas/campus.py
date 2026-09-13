@@ -13,6 +13,7 @@ class GateOut(BaseModel):
     longitude: float
     capacity: int
     status: str
+    provenance: str
     configuration_version: int
 
 
@@ -30,6 +31,7 @@ class RoadOut(BaseModel):
     is_driveable: bool
     status: str
     geometry: list[dict]
+    provenance: str
     configuration_version: int
 
 
@@ -50,6 +52,7 @@ class ParkingLotOut(BaseModel):
     reserved_capacity: int
     restricted_capacity: int
     temporarily_unavailable_capacity: int
+    provenance: str
     configuration_version: int
 
 
@@ -66,6 +69,7 @@ class DestinationOut(BaseModel):
     searchable_aliases: list[str]
     nearest_gates: list[str]
     nearest_parking_lots: list[str]
+    provenance: str
     configuration_version: int
 
 

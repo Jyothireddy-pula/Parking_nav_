@@ -13,11 +13,13 @@ gates:
     coordinates: { lat: 12.0000, lng: 77.0000 }
     capacity: 50
     status: open
+    provenance: SAMPLE
   - gate_id: sample-gate-north
     name: North Gate
     coordinates: { lat: 12.0050, lng: 77.0050 }
     capacity: 20
     status: open
+    provenance: SAMPLE
 
 parking_lots:
   - parking_lot_id: sample-lot-1
@@ -30,6 +32,7 @@ parking_lots:
     reserved_capacity: 5
     restricted_capacity: 3
     temporarily_unavailable_capacity: 2
+    provenance: SAMPLE
 
 destinations:
   - destination_id: sample-dest-academic-1
@@ -40,6 +43,7 @@ destinations:
     searchable_aliases: ["AB1", "Academic Block One"]
     nearest_gates: ["sample-gate-main"]
     nearest_parking_lots: ["sample-lot-1"]
+    provenance: SAMPLE
   - destination_id: sample-dest-library
     name: Central Library
     category: library
@@ -48,6 +52,7 @@ destinations:
     searchable_aliases: ["Library"]
     nearest_gates: ["sample-gate-north"]
     nearest_parking_lots: ["sample-lot-1"]
+    provenance: SAMPLE
 
 roads:
   - road_id: sample-road-1
@@ -59,6 +64,7 @@ roads:
     is_walkable: true
     is_driveable: true
     status: open
+    provenance: SAMPLE
     geometry:
       - { lat: 12.0000, lng: 77.0000 }
       - { lat: 12.0010, lng: 77.0010 }
@@ -72,6 +78,7 @@ roads:
     is_walkable: true
     is_driveable: false
     status: open
+    provenance: SAMPLE
     geometry:
       - { lat: 12.0015, lng: 77.0015 }
       - { lat: 12.0018, lng: 77.0018 }
@@ -85,6 +92,7 @@ roads:
     is_walkable: true
     is_driveable: false
     status: open
+    provenance: SAMPLE
     geometry:
       - { lat: 12.0020, lng: 77.0020 }
       - { lat: 12.0028, lng: 77.0028 }
@@ -98,6 +106,7 @@ roads:
     is_walkable: true
     is_driveable: true
     status: open
+    provenance: SAMPLE
     geometry:
       - { lat: 12.0035, lng: 77.0035 }
       - { lat: 12.0042, lng: 77.0042 }

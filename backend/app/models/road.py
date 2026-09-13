@@ -19,7 +19,11 @@ class Road(Base, TimestampMixin):
     is_walkable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_driveable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="open")
-    # Ordered [lat, lng] points forming the real walked/driven path. Must contain
-    # more than the two endpoint coordinates — see Module 1B's GPS survey output.
+    # Ordered [lat, lng] points forming the real walked/driven path (provenance
+    # REAL) or a digitized path pulled from a map source pending walk
+    # verification (provenance EXTERNAL_MAP_REFERENCE). Must contain more than
+    # the two endpoint coordinates — see Module 1B's GPS survey output.
     geometry: Mapped[list] = mapped_column(JSON, nullable=False)
+    # REAL / EXTERNAL_MAP_REFERENCE / SAMPLE — see app.models.provenance.
+    provenance: Mapped[str] = mapped_column(String(32), nullable=False)
     configuration_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

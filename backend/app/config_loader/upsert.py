@@ -50,6 +50,7 @@ async def upsert_campus_config(session: AsyncSession, config: CampusConfigFile) 
                 longitude=gate.coordinates.lng,
                 capacity=gate.capacity,
                 status=gate.status,
+                provenance=gate.provenance,
                 configuration_version=new_version,
             )
         )
@@ -75,6 +76,7 @@ async def upsert_campus_config(session: AsyncSession, config: CampusConfigFile) 
                 reserved_capacity=lot.reserved_capacity,
                 restricted_capacity=lot.restricted_capacity,
                 temporarily_unavailable_capacity=lot.temporarily_unavailable_capacity,
+                provenance=lot.provenance,
                 configuration_version=new_version,
             )
         )
@@ -96,6 +98,7 @@ async def upsert_campus_config(session: AsyncSession, config: CampusConfigFile) 
                 searchable_aliases=list(destination.searchable_aliases),
                 nearest_gates=list(destination.nearest_gates),
                 nearest_parking_lots=list(destination.nearest_parking_lots),
+                provenance=destination.provenance,
                 configuration_version=new_version,
             )
         )
@@ -136,6 +139,7 @@ async def upsert_campus_config(session: AsyncSession, config: CampusConfigFile) 
                 is_driveable=road.is_driveable,
                 status=road.status,
                 geometry=[point.model_dump() for point in road.geometry],
+                provenance=road.provenance,
                 configuration_version=new_version,
             )
         )

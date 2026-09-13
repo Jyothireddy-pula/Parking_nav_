@@ -31,4 +31,6 @@ class Destination(Base, TimestampMixin):
     searchable_aliases: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     nearest_gates: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     nearest_parking_lots: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    # REAL / EXTERNAL_MAP_REFERENCE / SAMPLE — see app.models.provenance.
+    provenance: Mapped[str] = mapped_column(String(32), nullable=False)
     configuration_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

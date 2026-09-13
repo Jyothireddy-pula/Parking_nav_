@@ -18,6 +18,7 @@ BASE_CONFIG: dict = {
             "coordinates": {"lat": 12.0, "lng": 77.0},
             "capacity": 10,
             "status": "open",
+            "provenance": "SAMPLE",
         },
     ],
     "parking_lots": [
@@ -30,6 +31,7 @@ BASE_CONFIG: dict = {
             "reserved_capacity": 5,
             "restricted_capacity": 3,
             "temporarily_unavailable_capacity": 2,
+            "provenance": "SAMPLE",
         },
     ],
     "destinations": [
@@ -40,6 +42,7 @@ BASE_CONFIG: dict = {
             "coordinates": {"lat": 12.001, "lng": 77.001},
             "nearest_gates": ["g1"],
             "nearest_parking_lots": ["p1"],
+            "provenance": "SAMPLE",
         },
     ],
     "roads": [
@@ -52,6 +55,7 @@ BASE_CONFIG: dict = {
             "expected_travel_time": 60.0,
             "is_walkable": True,
             "is_driveable": True,
+            "provenance": "SAMPLE",
             "geometry": [
                 {"lat": 12.0, "lng": 77.0},
                 {"lat": 12.0005, "lng": 77.0005},
@@ -67,6 +71,7 @@ BASE_CONFIG: dict = {
             "expected_travel_time": 30.0,
             "is_walkable": True,
             "is_driveable": False,
+            "provenance": "SAMPLE",
             "geometry": [
                 {"lat": 12.001, "lng": 77.001},
                 {"lat": 12.0012, "lng": 77.0012},
@@ -190,3 +195,39 @@ def test_config_validation_error_carries_every_error() -> None:
     exc = ConfigValidationError(errors)
 
     assert exc.errors == errors
+
+
+def test_missing_provenance_is_rejected() -> None:
+    gate = {k: v for k, v in BASE_CONFIG["gates"][0].items() if k != "provenance"}
+    config = _config(gates=[gate])
+
+    with pytest.raises(ValidationError, match="provenance"):
+        CampusConfigFile.model_validate(config)
+
+
+def test_invalid_provenance_label_is_rejected() -> None:
+    config = _config(gates=[{**BASE_CONFIG["gates"][0], "provenance": "MADE_UP"}])
+
+    with pytest.raises(ValidationError, match="provenance"):
+        CampusConfigFile.model_validate(config)
+
+
+def test_parking_lot_cannot_use_external_map_reference_provenance() -> None:
+    config = _config(
+        parking_lots=[{**BASE_CONFIG["parking_lots"][0], "provenance": "EXTERNAL_MAP_REFERENCE"}],
+    )
+
+    with pytest.raises(ValidationError, match="capacity can never come from a map source"):
+        CampusConfigFile.model_validate(config)
+
+
+def test_gate_and_destination_can_use_external_map_reference_provenance() -> None:
+    config = _config(
+        gates=[{**BASE_CONFIG["gates"][0], "provenance": "EXTERNAL_MAP_REFERENCE"}],
+        destinations=[{**BASE_CONFIG["destinations"][0], "provenance": "EXTERNAL_MAP_REFERENCE"}],
+    )
+
+    parsed = CampusConfigFile.model_validate(config)
+
+    assert parsed.gates[0].provenance == "EXTERNAL_MAP_REFERENCE"
+    assert parsed.destinations[0].provenance == "EXTERNAL_MAP_REFERENCE"
