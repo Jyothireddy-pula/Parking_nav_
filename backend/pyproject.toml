@@ -28,7 +28,7 @@ target-version = "py310"
 line-length = 100
 
 [tool.setuptools.packages.find]
-include = ["app*"]
+include = ["app*", "scripts*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
