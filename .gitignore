@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+*.egg-info/
+.env
+
+# Node
+node_modules/
+frontend/dist/
+frontend/node_modules/.tmp/
+npm-debug.log*
+
+# Data and runtime output
+data/raw/*
+data/processed/*
+data/external/*
+experiments/runs/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/external/.gitkeep
+!experiments/runs/.gitkeep
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

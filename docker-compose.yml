@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: parkingnavx
+      POSTGRES_USER: parkingnavx
+      POSTGRES_PASSWORD: parkingnavx
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    environment:
+      PARKINGNAVX_DATABASE_URL: postgresql+psycopg://parkingnavx:parkingnavx@postgres:5432/parkingnavx
+      PARKINGNAVX_CORS_ORIGINS: http://localhost:5173
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
