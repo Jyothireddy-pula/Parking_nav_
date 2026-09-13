@@ -6,14 +6,28 @@ from app.models.gate import Gate
 from app.models.parking_lot import ParkingLot
 from app.models.road import Road
 from app.models.route_edge import RouteEdge
+from app.models.twin import (
+    CampusState,
+    GateState,
+    ParkingState,
+    RoadState,
+    TwinSnapshot,
+    VehicleState,
+)
 
 __all__ = [
     "Base",
     "Campus",
+    "CampusState",
     "Destination",
     "Event",
     "Gate",
+    "GateState",
     "ParkingLot",
+    "ParkingState",
     "Road",
+    "RoadState",
     "RouteEdge",
+    "TwinSnapshot",
+    "VehicleState",
 ]
