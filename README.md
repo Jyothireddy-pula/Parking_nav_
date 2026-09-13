@@ -7,7 +7,8 @@ Campus parking platform. MODULE 0 built the application shell and API foundation
 - `frontend/`: one Vite + React app for public routes and protected `/admin` routes.
 - `backend/`: FastAPI API with routes -> services -> repositories -> database layering.
 - `configs/campuses/`: one YAML file per campus, loaded idempotently via `backend/scripts/load_campus_config.py`.
-- `ml/`, `simulation/`, `optimization/`: reserved module boundaries.
+- `ml/cv/`: Module 5's occupancy classifier, space-polygon annotation, calibration, and camera pipeline. See `docs/CV.md`.
+- `simulation/`, `optimization/`: reserved module boundaries.
 - `data/{raw,processed,sample,external}/`: provenance-scoped data locations.
 - `experiments/`, `tests/`, `docs/`, `docker/`: reserved foundation locations.
 
@@ -25,6 +26,17 @@ Read the loaded data through `GET /api/v1/campuses/{campus_id}/{gates|roads|park
 Real VIT-AP coordinates and road geometry must come from Module 1B's GPS survey output — never typed in by hand or estimated from a screenshot.
 
 Every future stored value must carry exactly one provenance label: `REAL`, `EXTERNAL`, `SYNTHETIC`, `SAMPLE`, or `COUNTERFACTUAL`. Missing observations remain `MISSING`; no values are guessed or silently imputed.
+
+## Computer vision occupancy detection (Module 5)
+
+`ml/cv/` — a logistic-regression classifier over handcrafted features (not a CNN — no verified GPU training run backs one), per-lot space polygon annotation, a frame→classify→aggregate→post pipeline that flags low-confidence (blurry or uncertain) frames instead of guessing, and a promotion rule that only trusts a lot's CV readings unsupervised (`cv_auto`) once a measured `cv_calibration_reports` row clears an explicit error threshold — otherwise every reading stays `cv_verified`. See `docs/CV.md` for dataset sources (PKLot/CNRPark-EXT, always labeled `EXTERNAL`), what has and hasn't actually been measured yet, and the recommended manual spot-check frequency.
+
+```powershell
+cd ml
+python -m venv .venv  # or reuse backend/.venv
+pip install -e ".[dev]"
+pytest
+```
 
 ## Run locally
 
@@ -69,4 +81,4 @@ This starts PostgreSQL 16, the reload-enabled backend on port 8000, and the Vite
 
 ## Intentionally not implemented
 
-Occupancy tracking, GPS/CV field collection pipelines (Module 1B), live map integration, prediction, optimization/routing logic, admin authentication, real VIT-AP survey data, external datasets, and production deployment are intentionally deferred to later modules. No accuracy or real-world benefit is claimed.
+Live map integration, prediction, optimization/routing logic, admin authentication, and production deployment are intentionally deferred to later modules. Real VIT-AP GPS survey data (Module 1B), real field-collected manual counts (Module 2), a real PKLot/CNRPark-EXT training run, and a real VIT-AP `cv_calibration_reports` row (Module 5) all require physical fieldwork or large external downloads that haven't happened in this environment — the tooling for all of them is built and tested against synthetic/sample stand-ins, clearly labeled as such. No accuracy or real-world benefit is claimed beyond what's actually been measured.

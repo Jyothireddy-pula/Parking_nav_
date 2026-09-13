@@ -114,10 +114,11 @@ class IngestionService:
                         Observation.campus_id == campus_id,
                         Observation.timestamp == observation.timestamp,
                         Observation.gate_id == observation.gate_id,
+                        Observation.collection_method == observation.collection_method,
                     )
                 )
                 if duplicate.scalars().first() is not None:
-                    reasons.append("duplicate observation for this campus/timestamp/gate_id")
+                    reasons.append("duplicate observation for this campus/timestamp/gate_id/collection_method")
 
         elif kind == "parking_lot_id":
             lots = {lot.parking_lot_id: lot for lot in await self._config.list_parking_lots(session, campus_id)}
@@ -139,10 +140,13 @@ class IngestionService:
                         Observation.campus_id == campus_id,
                         Observation.timestamp == observation.timestamp,
                         Observation.parking_lot_id == observation.parking_lot_id,
+                        Observation.collection_method == observation.collection_method,
                     )
                 )
                 if duplicate.scalars().first() is not None:
-                    reasons.append("duplicate observation for this campus/timestamp/parking_lot_id")
+                    reasons.append(
+                        "duplicate observation for this campus/timestamp/parking_lot_id/collection_method"
+                    )
 
         else:  # event_type
             if observation.event_intensity is None:
@@ -155,10 +159,11 @@ class IngestionService:
                         Observation.campus_id == campus_id,
                         Observation.timestamp == observation.timestamp,
                         Observation.event_type == observation.event_type,
+                        Observation.collection_method == observation.collection_method,
                     )
                 )
                 if duplicate.scalars().first() is not None:
-                    reasons.append("duplicate observation for this campus/timestamp/event_type")
+                    reasons.append("duplicate observation for this campus/timestamp/event_type/collection_method")
 
         return reasons
 

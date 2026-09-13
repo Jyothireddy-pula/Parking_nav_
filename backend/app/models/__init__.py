@@ -1,5 +1,6 @@
 from app.models.base import Base
 from app.models.campus import Campus
+from app.models.cv_calibration import CvCalibrationReport
 from app.models.destination import Destination
 from app.models.event import Event
 from app.models.gate import Gate
@@ -20,6 +21,7 @@ __all__ = [
     "Base",
     "Campus",
     "CampusState",
+    "CvCalibrationReport",
     "Destination",
     "Event",
     "Gate",

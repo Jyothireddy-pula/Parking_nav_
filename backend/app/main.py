@@ -9,6 +9,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.config import get_settings
 from app.logging_config import configure_logging
 from app.routes.campus import router as campus_router
+from app.routes.cv_calibration import router as cv_calibration_router
 from app.routes.health import router as health_router
 from app.routes.ingestion import router as ingestion_router
 from app.routes.twin import router as twin_router
@@ -57,3 +58,4 @@ app.include_router(health_router, prefix="/api/v1")
 app.include_router(campus_router, prefix="/api/v1")
 app.include_router(twin_router, prefix="/api/v1")
 app.include_router(ingestion_router, prefix="/api/v1")
+app.include_router(cv_calibration_router, prefix="/api/v1")
