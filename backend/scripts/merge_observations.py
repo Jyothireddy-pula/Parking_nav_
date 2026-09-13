@@ -28,6 +28,11 @@ PARKING_VALUE_FIELDS = ("capacity", "occupied_spaces")
 GATES_KEY_FIELDS = ("collection_session", "gate_id")
 GATES_VALUE_FIELDS = ("entered", "exited")
 
+# Carried through from the group's rows as-is (not part of the agreement
+# check) so downstream consumers — Module 4's bulk-csv ingestion in
+# particular — get a timestamp without re-deriving one.
+PASSTHROUGH_FIELDS = ("timestamp",)
+
 KIND_CONFIG = {
     "parking": {"key_fields": PARKING_KEY_FIELDS, "value_fields": PARKING_VALUE_FIELDS},
     "gates": {"key_fields": GATES_KEY_FIELDS, "value_fields": GATES_VALUE_FIELDS},
@@ -70,6 +75,8 @@ def merge_observations(kind: str, rows: list[dict]) -> tuple[list[dict], list[di
             consensus_values = next(iter(observed_value_sets))
             consensus_row = dict(zip(key_fields, key, strict=True))
             consensus_row.update(dict(zip(value_fields, consensus_values, strict=True)))
+            for field in PASSTHROUGH_FIELDS:
+                consensus_row[field] = group_rows[0].get(field, "")
             consensus_row["contributing_observers"] = ";".join(observers)
             consensus_row["observation_count"] = str(len(group_rows))
             consensus_row["source_label"] = "REAL"
@@ -106,7 +113,7 @@ def main() -> None:
 
     key_fields = list(KIND_CONFIG[args.kind]["key_fields"])
     value_fields = list(KIND_CONFIG[args.kind]["value_fields"])
-    consolidated_fieldnames = key_fields + value_fields + [
+    consolidated_fieldnames = key_fields + value_fields + list(PASSTHROUGH_FIELDS) + [
         "contributing_observers",
         "observation_count",
         "source_label",

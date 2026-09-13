@@ -3,6 +3,7 @@ from app.models.campus import Campus
 from app.models.destination import Destination
 from app.models.event import Event
 from app.models.gate import Gate
+from app.models.ingestion import IngestionBatch, Observation, ObservationRaw, ObservationRejected
 from app.models.parking_lot import ParkingLot
 from app.models.road import Road
 from app.models.route_edge import RouteEdge
@@ -23,6 +24,10 @@ __all__ = [
     "Event",
     "Gate",
     "GateState",
+    "IngestionBatch",
+    "Observation",
+    "ObservationRaw",
+    "ObservationRejected",
     "ParkingLot",
     "ParkingState",
     "Road",

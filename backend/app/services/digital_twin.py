@@ -177,9 +177,9 @@ class DigitalTwinService:
         campus_id: str,
         gate_id: str,
         queue: int,
-        throughput: float,
         source: str,
         provenance: str,
+        throughput: float | None = None,
         status: str | None = None,
         observation_timestamp: datetime | None = None,
     ) -> GateState:
@@ -194,7 +194,8 @@ class DigitalTwinService:
             raise InvalidObservationError(f"queue must be >= 0, got {queue}")
 
         row.queue = queue
-        row.throughput = throughput
+        if throughput is not None:
+            row.throughput = throughput
         if status is not None:
             row.status = status
         row.observation_timestamp = observation_timestamp or _now()

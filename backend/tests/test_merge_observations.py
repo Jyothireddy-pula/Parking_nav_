@@ -98,6 +98,31 @@ def test_gates_kind_merges_on_entered_and_exited() -> None:
     assert consolidated[0]["exited"] == "2"
 
 
+def test_timestamp_is_passed_through_to_the_consolidated_row() -> None:
+    rows = [
+        _row(
+            collection_session="s1",
+            parking_lot_id="lot-1",
+            observer="Alice",
+            capacity="100",
+            occupied_spaces="42",
+            timestamp="2026-01-12T09:00:00+05:30",
+        ),
+        _row(
+            collection_session="s1",
+            parking_lot_id="lot-1",
+            observer="Bob",
+            capacity="100",
+            occupied_spaces="42",
+            timestamp="2026-01-12T09:00:00+05:30",
+        ),
+    ]
+
+    consolidated, _conflicts = merge_observations("parking", rows)
+
+    assert consolidated[0]["timestamp"] == "2026-01-12T09:00:00+05:30"
+
+
 def test_unknown_kind_is_rejected() -> None:
     with pytest.raises(ValueError, match="unknown kind"):
         merge_observations("unknown", [])
