@@ -1,0 +1,115 @@
+# SAMPLE campus for local development only.
+# Coordinates and road geometry here are fabricated placeholders — they are
+# NOT real VIT-AP survey data. Real campus configs must be generated from
+# Module 1B's GPS survey output, never typed in by hand.
+campus_id: sample
+name: Sample Development Campus
+description: A small synthetic campus used only for local development and tests.
+timezone: Asia/Kolkata
+
+gates:
+  - gate_id: sample-gate-main
+    name: Main Gate
+    coordinates: { lat: 12.0000, lng: 77.0000 }
+    capacity: 50
+    status: open
+  - gate_id: sample-gate-north
+    name: North Gate
+    coordinates: { lat: 12.0050, lng: 77.0050 }
+    capacity: 20
+    status: open
+
+parking_lots:
+  - parking_lot_id: sample-lot-1
+    name: Lot 1
+    status: open
+    camera_available: false
+    camera_notes: null
+    total_capacity: 100
+    usable_capacity: 90
+    reserved_capacity: 5
+    restricted_capacity: 3
+    temporarily_unavailable_capacity: 2
+
+destinations:
+  - destination_id: sample-dest-academic-1
+    name: Academic Block 1
+    category: academic_block
+    coordinates: { lat: 12.0020, lng: 77.0020 }
+    department_names: ["Computer Science", "Electronics"]
+    searchable_aliases: ["AB1", "Academic Block One"]
+    nearest_gates: ["sample-gate-main"]
+    nearest_parking_lots: ["sample-lot-1"]
+  - destination_id: sample-dest-library
+    name: Central Library
+    category: library
+    coordinates: { lat: 12.0035, lng: 77.0035 }
+    department_names: []
+    searchable_aliases: ["Library"]
+    nearest_gates: ["sample-gate-north"]
+    nearest_parking_lots: ["sample-lot-1"]
+
+roads:
+  - road_id: sample-road-1
+    name: Gate to Lot 1
+    start_node: sample-gate-main
+    end_node: sample-lot-1
+    length: 120.5
+    expected_travel_time: 90
+    is_walkable: true
+    is_driveable: true
+    status: open
+    geometry:
+      - { lat: 12.0000, lng: 77.0000 }
+      - { lat: 12.0010, lng: 77.0010 }
+      - { lat: 12.0015, lng: 77.0015 }
+  - road_id: sample-road-2
+    name: Lot 1 to Academic Block 1
+    start_node: sample-lot-1
+    end_node: sample-dest-academic-1
+    length: 60.0
+    expected_travel_time: 45
+    is_walkable: true
+    is_driveable: false
+    status: open
+    geometry:
+      - { lat: 12.0015, lng: 77.0015 }
+      - { lat: 12.0018, lng: 77.0018 }
+      - { lat: 12.0020, lng: 77.0020 }
+  - road_id: sample-road-3
+    name: Academic Block 1 to Library
+    start_node: sample-dest-academic-1
+    end_node: sample-dest-library
+    length: 180.0
+    expected_travel_time: 130
+    is_walkable: true
+    is_driveable: false
+    status: open
+    geometry:
+      - { lat: 12.0020, lng: 77.0020 }
+      - { lat: 12.0028, lng: 77.0028 }
+      - { lat: 12.0035, lng: 77.0035 }
+  - road_id: sample-road-4
+    name: Library to North Gate
+    start_node: sample-dest-library
+    end_node: sample-gate-north
+    length: 90.0
+    expected_travel_time: 70
+    is_walkable: true
+    is_driveable: true
+    status: open
+    geometry:
+      - { lat: 12.0035, lng: 77.0035 }
+      - { lat: 12.0042, lng: 77.0042 }
+      - { lat: 12.0050, lng: 77.0050 }
+
+events:
+  - event_id: sample-event-orientation
+    event_type: orientation_day
+    name: Sample Orientation Day
+    start_time: "2026-01-10T09:00:00+05:30"
+    end_time: "2026-01-10T17:00:00+05:30"
+    # ASSUMPTION only — not measured. Development placeholder.
+    expected_demand_multiplier: 1.5
+    affected_zones: ["sample-lot-1"]
+    status: scheduled
