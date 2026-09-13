@@ -501,9 +501,20 @@ class IngestionService:
         )
 
         rejection_reason_counts: dict[str, int] = {}
+        missing_required_field_rejections = 0
         for combined_reason in rejected_rows:
             for reason in combined_reason.split("; "):
                 rejection_reason_counts[reason] = rejection_reason_counts.get(reason, 0) + 1
+                if "is required" in reason:
+                    missing_required_field_rejections += 1
+
+        accepted_missing_notes = (
+            await session.execute(
+                select(func.count())
+                .select_from(Observation)
+                .where(Observation.campus_id == campus_id, Observation.notes.is_(None))
+            )
+        ).scalar_one()
 
         method_rows = (
             (
@@ -544,6 +555,10 @@ class IngestionService:
             "accepted_total": accepted_total,
             "rejected_total": len(rejected_rows),
             "rejection_reason_counts": rejection_reason_counts,
+            "missing_fields": {
+                "rejected_due_to_missing_required_field": missing_required_field_rejections,
+                "accepted_missing_notes": accepted_missing_notes,
+            },
             "accepted_by_collection_method": accepted_by_collection_method,
             "coverage": {
                 "parking_lots_with_observations": lots_with_observations,

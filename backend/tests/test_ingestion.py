@@ -342,3 +342,33 @@ async def test_cv_batch_ingests_multiple_observations(
 
     assert batch.accepted_rows == 2
     assert batch.submitted_via == "cv_batch"
+
+
+async def test_quality_report_covers_totals_missing_fields_and_coverage(
+    db_session: AsyncSession, service: IngestionService, sample_campus: str
+) -> None:
+    await service.ingest_one(db_session, sample_campus, _parking_observation(occupied_spaces=10))
+    await service.ingest_one(db_session, sample_campus, _parking_observation(occupied_spaces=99999))
+    await service.ingest_one(
+        db_session,
+        sample_campus,
+        ObservationIn(
+            timestamp=datetime.now(timezone.utc),
+            gate_id="sample-gate-main",
+            source_label="REAL",
+            collection_method="manual_count",
+        ),
+    )
+
+    report = await service.get_quality_report(db_session, sample_campus)
+
+    assert report["raw_total"] == 3
+    assert report["accepted_total"] == 1
+    assert report["rejected_total"] == 2
+    assert report["missing_fields"]["rejected_due_to_missing_required_field"] == 1
+    assert report["missing_fields"]["accepted_missing_notes"] == 1
+    assert report["accepted_by_collection_method"] == {"manual_count": 1}
+    assert report["coverage"]["parking_lots_with_observations"] == 1
+    assert report["coverage"]["parking_lots_total"] == 1
+    assert report["coverage"]["gates_with_observations"] == 0
+    assert report["coverage"]["gates_total"] == 2

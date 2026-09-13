@@ -78,5 +78,6 @@ class QualityReportOut(BaseModel):
     accepted_total: int
     rejected_total: int
     rejection_reason_counts: dict[str, int]
+    missing_fields: dict[str, int]
     accepted_by_collection_method: dict[str, int]
     coverage: dict[str, int]

@@ -167,13 +167,24 @@ async def test_quality_report(client: AsyncClient) -> None:
             "collection_method": "manual_count",
         },
     )
+    await client.post(
+        "/api/v1/campuses/sample/observations",
+        json={
+            "timestamp": now,
+            "gate_id": "sample-gate-main",
+            "source_label": "REAL",
+            "collection_method": "manual_count",
+        },
+    )
 
     response = await client.get("/api/v1/campuses/sample/observations/quality-report")
 
     assert response.status_code == 200
     body = response.json()
-    assert body["raw_total"] == 2
+    assert body["raw_total"] == 3
     assert body["accepted_total"] == 1
-    assert body["rejected_total"] == 1
+    assert body["rejected_total"] == 2
+    assert body["missing_fields"]["rejected_due_to_missing_required_field"] == 1
+    assert body["missing_fields"]["accepted_missing_notes"] == 1
     assert body["coverage"]["parking_lots_total"] == 1
     assert body["coverage"]["parking_lots_with_observations"] == 1
