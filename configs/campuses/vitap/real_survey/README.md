@@ -1,11 +1,12 @@
 # VIT-AP real survey — status
 
-**Step 1 (OSM check) is done — see `osm_reference/` and
-`vitap_candidate.yaml`.** Steps 2–3 (the physical GPS walk and
-satellite verification) have not happened yet. Per this project's rule
-against inventing or estimating VIT-AP data, nothing here is labeled
-`REAL` until someone has actually walked the campus with a GPS device
-and verified the result against a satellite view.
+**Step 1 (OSM check) is done, and the campus is now loadable** as
+`../../vitap.yaml` (`configs/campuses/vitap.yaml`, one level up from
+here) — see that file's own header. Steps 2–3 (the physical GPS walk
+and satellite verification) have not happened yet. Per this project's
+rule against inventing or estimating VIT-AP data, nothing here is
+labeled `REAL` until someone has actually walked the campus with a GPS
+device and verified the result against a satellite view.
 
 ## Structure
 
@@ -16,33 +17,36 @@ real_survey/
 │                         # (empty — Step 2 hasn't happened yet)
 ├── osm_reference/        # DONE: Overpass/OSM GeoJSON pull, EXTERNAL_MAP_REFERENCE
 │                         # only — see osm_reference/README.md for what's in it
-├── vitap_candidate.yaml  # DONE: the 11 real named buildings from osm_reference/,
-│                         # in Module 1's schema shape — NOT loadable yet, see below
+├── vitap_candidate.yaml  # DONE: the 11 real named buildings, EXTERNAL_MAP_REFERENCE
+│                         # only — kept as a record of exactly what's real
 ├── vitap.generated.yaml  # Output of scripts/gps_survey_to_config.py (not yet generated)
 └── SURVEY_LOG.md         # Who walked what, when, with what device (no entries yet)
+
+../vitap.yaml             # ACTIVE, LOADABLE: the 11 real destinations above, plus a
+                          # fabricated SAMPLE gate/lot/roads for connectivity — see
+                          # its header before treating any of it as real infrastructure
 ```
 
-## `vitap_candidate.yaml` — real data, correctly not usable yet
+## Two files, two purposes
 
-This is real: 11 building names and coordinates, pulled live from
-OpenStreetMap, in the exact shape Module 1's config expects, each
-stamped `provenance: EXTERNAL_MAP_REFERENCE`. It has **no gates, no
-parking lots, and no roads** — OSM has zero gates and zero
-name/capacity-bearing parking lots for this campus, and while ~100
-roads/paths exist in the OSM pull, none reliably connect two of these
-buildings without inventing adjacency (see `osm_reference/README.md`
-for the one weak candidate that was found and rejected).
+- **`vitap_candidate.yaml`** (this directory): the honest record of
+  exactly what Step 1 found — 11 real destinations, nothing else. It's
+  intentionally *not* loadable (`backend/tests/test_vitap_candidate_config.py`
+  proves it correctly fails Module 1's orphan-node check, since no
+  gate/lot/road exists in real data). Keep this file as the reference
+  for "what did OSM actually give us."
+- **`../vitap.yaml`**: the active campus config the system actually
+  loads. Same 11 real destinations, `EXTERNAL_MAP_REFERENCE`. Plus a
+  fabricated placeholder gate, parking lot, and a straight-line road
+  from the lot to every destination — all stamped `provenance: SAMPLE`,
+  added only so the campus is loadable/routable/twin-able for
+  development before the physical walk happens
+  (`backend/tests/test_vitap_config.py` verifies the real/fake split
+  stays exactly this way). None of the `SAMPLE` entities are real
+  infrastructure — no confirmed gate, no surveyed lot capacity, no
+  walked road exists yet.
 
-`backend/tests/test_vitap_candidate_config.py` proves this state
-concretely: every entity in the file parses correctly (real names, real
-coordinates, valid categories), but loading the file for real correctly
-fails Module 1's orphan-node check — all 11 destinations are flagged,
-because nothing connects them yet. That failure is the honest, current
-status, not a bug: real names and coordinates exist, but the campus
-isn't walkable, connected, or capacitied yet. Nothing was forced through
-to make this "work" — the physical walk is what's actually missing.
-
-## How to finish this
+## How to finish this for real
 
 1. ~~Check OSM first (Step 1)~~ — done, see `osm_reference/README.md`
    and `vitap_candidate.yaml`.
@@ -52,14 +56,17 @@ to make this "work" — the physical walk is what's actually missing.
    (AB-1, AB-2, CB, MH-1/2/3/6/7, LH-1, Food Street, MH-2 Food Store),
    ~100 roads/paths are roughly mapped, and 2 unnamed parking areas have
    outlines. Still needed from scratch: every gate, every lot's capacity
-   count, and enough walked roads to actually connect the buildings.
+   count, and every real walked road (replacing `vitap.yaml`'s
+   straight-line placeholders one by one).
 3. Drop the raw GPX/CSV exports into `raw_exports/`, unmodified.
 4. Run `backend/scripts/gps_survey_to_config.py` against them to produce
    `vitap.generated.yaml` — this can reuse the 11 real names/categories
-   above (re-verified on the walk) plus whatever `vitap_candidate.yaml`
-   didn't have.
+   above (re-verified on the walk).
 5. Fill in `SURVEY_LOG.md` with the actual walk details.
-6. Load the generated config with `backend/scripts/load_campus_config.py`
+6. Merge the real gate/lot/roads into `../vitap.yaml`, removing the
+   `SAMPLE` placeholders they replace, and flip each destination's
+   `provenance` to `REAL` once its coordinate has been walked and
+   satellite-checked. Load with `backend/scripts/load_campus_config.py`
    once it passes review.
 
 See `backend/tests/fixtures/sample_survey.gpx` and

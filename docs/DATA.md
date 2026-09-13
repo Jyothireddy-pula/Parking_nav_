@@ -62,9 +62,19 @@ all (`app/config_loader/schema.py`, `app/models/provenance.py`). The 11
 real named buildings this Overpass pull found are captured as an actual
 `CampusConfigFile`-shaped candidate at
 `configs/campuses/vitap/real_survey/vitap_candidate.yaml` — every entity
-parses correctly, but loading it for real correctly fails Module 1's
+parses correctly, but loading it as-is correctly fails Module 1's
 orphan-node check, because nothing connects those buildings yet. See
 that directory's `README.md`.
+
+`configs/campuses/vitap.yaml` (the actual loadable campus) takes this
+further, deliberately mixing provenance: the 11 destinations keep their
+real names/coordinates and `EXTERNAL_MAP_REFERENCE` label; a placeholder
+gate, a placeholder parking lot, and every connecting road are
+fabricated and stamped `SAMPLE` (straight lines between real points, not
+walked paths — see that file's header). This exists so the campus is
+loadable and testable end to end before the physical walk happens; it
+is not a substitute for Steps 2–3, and every `SAMPLE` entity is meant to
+be replaced by a real one once that walk produces one.
 
 ## Step 2 — GPS walk survey (produces REAL coordinates)
 

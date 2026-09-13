@@ -1,0 +1,336 @@
+# VIT-AP — MIXED PROVENANCE, READ THIS BEFORE EDITING.
+#
+# destinations: REAL NAMES, REAL COORDINATES. Pulled live from the
+# OpenStreetMap Overpass API on 2026-09-13 (see
+# configs/campuses/vitap/real_survey/osm_reference/). provenance:
+# EXTERNAL_MAP_REFERENCE — real, but not yet GPS-walk/satellite-verified
+# (Module 1B Steps 2-3 still haven't happened).
+#
+# gates, parking_lots, roads: FABRICATED PLACEHOLDERS, provenance: SAMPLE.
+# VIT-AP has no gate or parking-lot data in any real source yet (OSM has
+# zero of either for this campus, and capacity can never come from a map
+# source anyway), and no real road/path connects these buildings without
+# inventing adjacency (see osm_reference/README.md). These entries exist
+# only so this campus is loadable and routable for development/testing —
+# a single placeholder gate and lot, connected to every real destination
+# by a straight line (NOT a walked path — see each road's name and the
+# note below). Road `length` is the real haversine distance between real
+# endpoints; `expected_travel_time` is a rough walking-speed estimate
+# (1.3 m/s), not a measurement.
+#
+# None of this replaces Module 1B's physical GPS walk. When that happens,
+# replace every SAMPLE gate/lot/road below with REAL ones from
+# gps_survey_to_config.py, and re-verify the destinations against
+# satellite view before flipping their provenance to REAL.
+
+campus_id: vitap
+name: VIT-AP University
+description: >
+  Real building names/coordinates from OpenStreetMap (EXTERNAL_MAP_REFERENCE).
+  Gate, parking lot, and all roads are fabricated SAMPLE placeholders for
+  connectivity only — see the file header before treating any of this as
+  real infrastructure.
+timezone: Asia/Kolkata
+
+gates:
+  - gate_id: vitap-gate-placeholder
+    name: "Placeholder Gate (SAMPLE — not a confirmed real gate)"
+    # Real OSM campus-boundary vertex (node 7017736757), reused only as a
+    # plausible location — no real gate is confirmed here.
+    coordinates: { lat: 16.4911715, lng: 80.5018052 }
+    capacity: 30
+    status: open
+    provenance: SAMPLE
+
+parking_lots:
+  - parking_lot_id: vitap-lot-placeholder
+    name: "Placeholder Lot (SAMPLE — not a real surveyed lot)"
+    status: open
+    camera_available: false
+    camera_notes: "Fabricated placeholder — no physical count has been done. See docs/FIELD_SURVEY.md."
+    total_capacity: 50
+    usable_capacity: 45
+    reserved_capacity: 3
+    restricted_capacity: 1
+    temporarily_unavailable_capacity: 1
+    provenance: SAMPLE
+
+destinations:
+  - destination_id: vitap-osm-1485919486
+    name: AB-1
+    category: academic_block
+    coordinates: { lat: 16.495673, lng: 80.500528 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: ["vitap-gate-placeholder"]
+    nearest_parking_lots: ["vitap-lot-placeholder"]
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-750542242
+    name: AB-2
+    category: academic_block
+    coordinates: { lat: 16.495620, lng: 80.498022 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: ["vitap-gate-placeholder"]
+    nearest_parking_lots: ["vitap-lot-placeholder"]
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1255690439
+    name: CB
+    category: administrative_building
+    coordinates: { lat: 16.494387, lng: 80.499217 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: ["vitap-gate-placeholder"]
+    nearest_parking_lots: ["vitap-lot-placeholder"]
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1321555307
+    name: Food Street
+    category: cafeteria
+    coordinates: { lat: 16.493761, lng: 80.498390 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: ["vitap-gate-placeholder"]
+    nearest_parking_lots: ["vitap-lot-placeholder"]
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1434460208
+    name: MH-1
+    category: hostel
+    coordinates: { lat: 16.494185, lng: 80.500627 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: ["vitap-gate-placeholder"]
+    nearest_parking_lots: ["vitap-lot-placeholder"]
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1434460210
+    name: MH-2
+    category: hostel
+    coordinates: { lat: 16.493550, lng: 80.501323 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: ["vitap-gate-placeholder"]
+    nearest_parking_lots: ["vitap-lot-placeholder"]
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1434908865
+    name: MH-2 Food Store
+    category: cafeteria
+    coordinates: { lat: 16.493774, lng: 80.500964 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: ["vitap-gate-placeholder"]
+    nearest_parking_lots: ["vitap-lot-placeholder"]
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1434460214
+    name: MH-3
+    category: hostel
+    coordinates: { lat: 16.492118, lng: 80.501363 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: ["vitap-gate-placeholder"]
+    nearest_parking_lots: ["vitap-lot-placeholder"]
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1434890457
+    name: MH-6
+    category: hostel
+    coordinates: { lat: 16.491991, lng: 80.499746 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: ["vitap-gate-placeholder"]
+    nearest_parking_lots: ["vitap-lot-placeholder"]
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1485935404
+    name: MH-7
+    category: hostel
+    coordinates: { lat: 16.492680, lng: 80.500436 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: ["vitap-gate-placeholder"]
+    nearest_parking_lots: ["vitap-lot-placeholder"]
+    provenance: EXTERNAL_MAP_REFERENCE
+  - destination_id: vitap-osm-1485935405
+    name: LH-1
+    category: hostel
+    coordinates: { lat: 16.491970, lng: 80.496657 }
+    department_names: []
+    searchable_aliases: []
+    nearest_gates: ["vitap-gate-placeholder"]
+    nearest_parking_lots: ["vitap-lot-placeholder"]
+    provenance: EXTERNAL_MAP_REFERENCE
+
+# Every road below is a fabricated SAMPLE placeholder: a straight line
+# between two real points (a 3rd, midpoint, coordinate is included only
+# to satisfy the schema's "not just two endpoints" structural check —
+# it is still literally a straight line, not a walked curve). `length`
+# is the real haversine distance between the real endpoints;
+# `expected_travel_time` is length / 1.3 m/s (a walking-speed estimate,
+# not a measurement).
+roads:
+  - road_id: vitap-road-gate-to-lot
+    name: "Placeholder Gate to Placeholder Lot (SAMPLE straight line)"
+    start_node: vitap-gate-placeholder
+    end_node: vitap-lot-placeholder
+    length: 254.5
+    expected_travel_time: 196
+    is_walkable: true
+    is_driveable: true
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4911715, lng: 80.5018052 }
+      - { lat: 16.49218575, lng: 80.5012526 }
+      - { lat: 16.4932000, lng: 80.5007000 }
+  - road_id: vitap-road-lot-to-ab1
+    name: "Placeholder Lot to AB-1 (SAMPLE straight line)"
+    start_node: vitap-lot-placeholder
+    end_node: vitap-osm-1485919486
+    length: 275.6
+    expected_travel_time: 212
+    is_walkable: true
+    is_driveable: false
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4932000, lng: 80.5007000 }
+      - { lat: 16.4944365, lng: 80.500614 }
+      - { lat: 16.495673, lng: 80.500528 }
+  - road_id: vitap-road-lot-to-ab2
+    name: "Placeholder Lot to AB-2 (SAMPLE straight line)"
+    start_node: vitap-lot-placeholder
+    end_node: vitap-osm-750542242
+    length: 392.3
+    expected_travel_time: 302
+    is_walkable: true
+    is_driveable: false
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4932000, lng: 80.5007000 }
+      - { lat: 16.4944100, lng: 80.499361 }
+      - { lat: 16.495620, lng: 80.498022 }
+  - road_id: vitap-road-lot-to-cb
+    name: "Placeholder Lot to CB (SAMPLE straight line)"
+    start_node: vitap-lot-placeholder
+    end_node: vitap-osm-1255690439
+    length: 206.0
+    expected_travel_time: 158
+    is_walkable: true
+    is_driveable: false
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4932000, lng: 80.5007000 }
+      - { lat: 16.4937935, lng: 80.4999585 }
+      - { lat: 16.494387, lng: 80.499217 }
+  - road_id: vitap-road-lot-to-food-street
+    name: "Placeholder Lot to Food Street (SAMPLE straight line)"
+    start_node: vitap-lot-placeholder
+    end_node: vitap-osm-1321555307
+    length: 254.1
+    expected_travel_time: 195
+    is_walkable: true
+    is_driveable: false
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4932000, lng: 80.5007000 }
+      - { lat: 16.4934805, lng: 80.499545 }
+      - { lat: 16.493761, lng: 80.498390 }
+  - road_id: vitap-road-lot-to-mh1
+    name: "Placeholder Lot to MH-1 (SAMPLE straight line)"
+    start_node: vitap-lot-placeholder
+    end_node: vitap-osm-1434460208
+    length: 109.8
+    expected_travel_time: 84
+    is_walkable: true
+    is_driveable: false
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4932000, lng: 80.5007000 }
+      - { lat: 16.4936925, lng: 80.5006635 }
+      - { lat: 16.494185, lng: 80.500627 }
+  - road_id: vitap-road-lot-to-mh2
+    name: "Placeholder Lot to MH-2 (SAMPLE straight line)"
+    start_node: vitap-lot-placeholder
+    end_node: vitap-osm-1434460210
+    length: 77.0
+    expected_travel_time: 59
+    is_walkable: true
+    is_driveable: false
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4932000, lng: 80.5007000 }
+      - { lat: 16.4933750, lng: 80.5010115 }
+      - { lat: 16.493550, lng: 80.501323 }
+  - road_id: vitap-road-lot-to-mh2-food-store
+    name: "Placeholder Lot to MH-2 Food Store (SAMPLE straight line)"
+    start_node: vitap-lot-placeholder
+    end_node: vitap-osm-1434908865
+    length: 69.8
+    expected_travel_time: 54
+    is_walkable: true
+    is_driveable: false
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4932000, lng: 80.5007000 }
+      - { lat: 16.4934870, lng: 80.500832 }
+      - { lat: 16.493774, lng: 80.500964 }
+  - road_id: vitap-road-lot-to-mh3
+    name: "Placeholder Lot to MH-3 (SAMPLE straight line)"
+    start_node: vitap-lot-placeholder
+    end_node: vitap-osm-1434460214
+    length: 139.5
+    expected_travel_time: 107
+    is_walkable: true
+    is_driveable: false
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4932000, lng: 80.5007000 }
+      - { lat: 16.4926590, lng: 80.5010315 }
+      - { lat: 16.492118, lng: 80.501363 }
+  - road_id: vitap-road-lot-to-mh6
+    name: "Placeholder Lot to MH-6 (SAMPLE straight line)"
+    start_node: vitap-lot-placeholder
+    end_node: vitap-osm-1434890457
+    length: 168.6
+    expected_travel_time: 130
+    is_walkable: true
+    is_driveable: false
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4932000, lng: 80.5007000 }
+      - { lat: 16.4925955, lng: 80.500223 }
+      - { lat: 16.491991, lng: 80.499746 }
+  - road_id: vitap-road-lot-to-mh7
+    name: "Placeholder Lot to MH-7 (SAMPLE straight line)"
+    start_node: vitap-lot-placeholder
+    end_node: vitap-osm-1485935404
+    length: 64.3
+    expected_travel_time: 49
+    is_walkable: true
+    is_driveable: false
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4932000, lng: 80.5007000 }
+      - { lat: 16.4929400, lng: 80.500568 }
+      - { lat: 16.492680, lng: 80.500436 }
+  - road_id: vitap-road-lot-to-lh1
+    name: "Placeholder Lot to LH-1 (SAMPLE straight line)"
+    start_node: vitap-lot-placeholder
+    end_node: vitap-osm-1485935405
+    length: 452.2
+    expected_travel_time: 348
+    is_walkable: true
+    is_driveable: false
+    status: open
+    provenance: SAMPLE
+    geometry:
+      - { lat: 16.4932000, lng: 80.5007000 }
+      - { lat: 16.4925850, lng: 80.4986785 }
+      - { lat: 16.491970, lng: 80.496657 }
+
+events: []

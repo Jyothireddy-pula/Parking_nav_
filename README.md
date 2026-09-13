@@ -1,6 +1,6 @@
 # ParkingNav-X
 
-Campus parking platform. MODULE 0 built the application shell and API foundation; MODULE 1 adds campus configuration (campuses, gates, roads, parking lots, destinations, events, and the routable graph derived from them). No VIT-AP operational field data is included yet — only a fabricated `sample` campus for development, clearly labeled as such.
+Campus parking platform. MODULE 0 built the application shell and API foundation; MODULE 1 adds campus configuration (campuses, gates, roads, parking lots, destinations, events, and the routable graph derived from them). Two campuses exist: a fully fabricated `sample` campus for development, and `vitap` — real VIT-AP building names/coordinates from OpenStreetMap, connected by fabricated placeholder roads/gate/lot until Module 1B's physical GPS walk replaces them. See `configs/campuses/vitap.yaml`'s header and `docs/DATA.md` for exactly what's real and what isn't.
 
 ## Structure
 
@@ -18,14 +18,12 @@ Each campus is defined in `configs/campuses/<campus_id>.yaml`: campus metadata, 
 
 ```powershell
 cd backend
-python -m scripts.load_campus_config sample.yaml   # or with no args, to load every file in configs/campuses/
+python -m scripts.load_campus_config sample.yaml   # or vitap.yaml, or no args to load every file in configs/campuses/
 ```
 
 Read the loaded data through `GET /api/v1/campuses/{campus_id}/{gates|roads|parking-lots|destinations|events}`.
 
-Real VIT-AP coordinates and road geometry must come from Module 1B's GPS survey output — never typed in by hand or estimated from a screenshot.
-
-Every future stored value must carry exactly one provenance label: `REAL`, `EXTERNAL`, `SYNTHETIC`, `SAMPLE`, or `COUNTERFACTUAL`. Missing observations remain `MISSING`; no values are guessed or silently imputed.
+Every gate, road, parking lot, and destination carries a required `provenance`: `REAL` (Module 1B GPS-walk/satellite verified, or Module 2 physical count), `EXTERNAL_MAP_REFERENCE` (pulled from a public map source — real, but not field-verified; never valid for a parking lot's capacity), or `SAMPLE` (fabricated placeholder). Live observations (Modules 3-4) use a separate set: `REAL`, `EXTERNAL`, `SYNTHETIC`, `SAMPLE`, `COUNTERFACTUAL`. Missing observations remain `MISSING`; no values are guessed or silently imputed.
 
 ## Computer vision occupancy detection (Module 5)
 
