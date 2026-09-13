@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="test-fixture" xmlns="http://www.topografix.com/GPX/1/1">
+  <wpt lat="12.00000" lon="77.00000">
+    <name>wpt_gate</name>
+  </wpt>
+  <wpt lat="12.00250" lon="77.00250">
+    <name>wpt_dest</name>
+  </wpt>
+  <wpt lat="12.00120" lon="77.00120">
+    <name>wpt_lot1_center</name>
+  </wpt>
+  <trk>
+    <name>trk_lot1_perimeter</name>
+    <trkseg>
+      <trkpt lat="12.00110" lon="77.00110"></trkpt>
+      <trkpt lat="12.00110" lon="77.00130"></trkpt>
+      <trkpt lat="12.00130" lon="77.00130"></trkpt>
+      <trkpt lat="12.00130" lon="77.00110"></trkpt>
+      <trkpt lat="12.00110" lon="77.00110"></trkpt>
+    </trkseg>
+  </trk>
+  <trk>
+    <name>trk_road1</name>
+    <trkseg>
+      <trkpt lat="12.00000" lon="77.00000"></trkpt>
+      <trkpt lat="12.00050" lon="77.00050"></trkpt>
+      <trkpt lat="12.00080" lon="77.00080"></trkpt>
+      <trkpt lat="12.00120" lon="77.00120"></trkpt>
+    </trkseg>
+  </trk>
+  <trk>
+    <name>trk_road2</name>
+    <trkseg>
+      <trkpt lat="12.00120" lon="77.00120"></trkpt>
+      <trkpt lat="12.00180" lon="77.00180"></trkpt>
+      <trkpt lat="12.00250" lon="77.00250"></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

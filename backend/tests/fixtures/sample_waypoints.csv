@@ -1,0 +1,6 @@
+entity_type,entity_id,name,gpx_ref,center_gpx_ref,category,capacity,total_capacity,usable_capacity,reserved_capacity,restricted_capacity,temporarily_unavailable_capacity,camera_available,camera_notes,start_node,end_node,is_walkable,is_driveable,status,department_names,searchable_aliases,nearest_gates,nearest_parking_lots,expected_travel_time
+gate,test-gate,Test Gate,wpt_gate,,,10,,,,,,false,,,,,,open,,,,,
+parking_lot,test-lot,Test Lot,trk_lot1_perimeter,wpt_lot1_center,,,50,45,3,1,1,true,Sample camera note,,,,,open,,,,,
+destination,test-dest,Test Destination,wpt_dest,,academic_block,,,,,,,false,,,,,,open,,,test-gate,test-lot,
+road,road-1,Gate to Lot,trk_road1,,,,,,,,,false,,test-gate,test-lot,true,true,open,,,,,60
+road,road-2,Lot to Destination,trk_road2,,,,,,,,,false,,test-lot,test-dest,true,false,open,,,,,45

@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, ForeignKey, Integer, String
+from sqlalchemy import JSON, Boolean, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin
@@ -15,6 +15,12 @@ class ParkingLot(Base, TimestampMixin):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="open")
     camera_available: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     camera_notes: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+
+    # Walked perimeter (4+ [lat, lng] points) and center point from Module 1B's
+    # GPS survey. Nullable: not every lot has been surveyed yet.
+    center_latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    center_longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    geometry: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
     # Capacity must come from a verified physical count (Module 1B/2), never
     # derived from map area.

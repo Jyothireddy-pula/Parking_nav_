@@ -42,6 +42,9 @@ class ParkingLotOut(BaseModel):
     status: str
     camera_available: bool
     camera_notes: str | None
+    center_latitude: float | None
+    center_longitude: float | None
+    geometry: list[dict] | None
     total_capacity: int
     usable_capacity: int
     reserved_capacity: int

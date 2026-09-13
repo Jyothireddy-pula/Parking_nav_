@@ -76,6 +76,10 @@ class ParkingLotConfig(BaseModel):
     reserved_capacity: int = Field(ge=0, default=0)
     restricted_capacity: int = Field(ge=0, default=0)
     temporarily_unavailable_capacity: int = Field(ge=0, default=0)
+    # Walked perimeter + center point from Module 1B's GPS survey. Optional:
+    # not every lot has been surveyed yet.
+    center: Coordinates | None = None
+    geometry: list[Coordinates] | None = None
 
     @field_validator("status")
     @classmethod
@@ -83,6 +87,15 @@ class ParkingLotConfig(BaseModel):
         if value not in PARKING_LOT_STATUSES:
             raise ValueError(f"parking lot status must be one of {PARKING_LOT_STATUSES}, got {value!r}")
         return value
+
+    @model_validator(mode="after")
+    def _perimeter_is_a_real_boundary(self) -> "ParkingLotConfig":
+        if self.geometry is not None and len(self.geometry) < 4:
+            raise ValueError(
+                f"parking lot {self.parking_lot_id!r} geometry must contain at least 4 walked "
+                f"perimeter points, got {len(self.geometry)}"
+            )
+        return self
 
     @model_validator(mode="after")
     def _capacity_breakdown_fits_total(self) -> "ParkingLotConfig":
