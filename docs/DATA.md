@@ -38,6 +38,20 @@ exist, capacities that were never accurate to begin with). Anything taken
 from this source is labeled `EXTERNAL_MAP_REFERENCE` and must be
 independently verified in Step 3 before it can become `REAL`.
 
+**Status: done.** Queried live against the public Overpass API (no
+signup needed, no overpass-turbo.eu UI required — a direct HTTP query
+works the same way) on 2026-09-13. Found real coverage: a campus
+boundary, 40 tagged buildings (11 named — academic blocks, hostels,
+a central block, a food street), ~100 road/path ways, and 2 parking-area
+outlines. Zero gates. Raw responses and the converted GeoJSON are in
+`configs/campuses/vitap/real_survey/osm_reference/` — see that
+directory's `README.md` for the exact queries run and a full breakdown.
+`backend/scripts/overpass_export_to_geojson.py` does the JSON→GeoJSON
+conversion and stamps every feature `EXTERNAL_MAP_REFERENCE`. Steps 2–3
+(the physical walk and satellite verification) still haven't happened —
+this skeleton does not change that requirement, it just gives the walk
+something real to start from instead of nothing.
+
 ## Step 2 — GPS walk survey (produces REAL coordinates)
 
 Conducted the same week, the same physical walk, as Module 2's field
