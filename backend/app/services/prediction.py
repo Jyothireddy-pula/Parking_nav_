@@ -154,7 +154,7 @@ class PredictionService:
         if registered is None:
             return await self._store(
                 session, prediction_id, campus_id, parking_lot_id, horizon_minutes, now, target_ts,
-                None, None, None, None, INTELLIGENCE_UNAVAILABLE, None, {},
+                None, None, None, INTELLIGENCE_UNAVAILABLE, None, {},
             )
 
         features_row, latest_observation_ts = await self._build_live_features(
@@ -163,8 +163,7 @@ class PredictionService:
         if features_row is None:
             return await self._store(
                 session, prediction_id, campus_id, parking_lot_id, horizon_minutes, now, target_ts,
-                None, None, None, registered.evaluation.model_version, INTELLIGENCE_UNAVAILABLE,
-                registered.evaluation.evaluation_id, {},
+                None, None, None, INTELLIGENCE_UNAVAILABLE, registered.evaluation, {},
             )
 
         import pandas as pd  # local import: only needed on this path
@@ -180,8 +179,7 @@ class PredictionService:
 
         result = await self._store(
             session, prediction_id, campus_id, parking_lot_id, horizon_minutes, now, target_ts,
-            point, lower, upper, registered.evaluation.model_version, confidence,
-            registered.evaluation.evaluation_id, features_row,
+            point, lower, upper, confidence, registered.evaluation, features_row,
         )
 
         try:
@@ -280,11 +278,15 @@ class PredictionService:
         point_estimate: float | None,
         lower_bound: float | None,
         upper_bound: float | None,
-        model_version: str | None,
         confidence: str,
-        evaluation_id: str | None,
+        evaluation: PredictionEvaluation | None,
         feature_snapshot: dict,
     ) -> PredictionResult:
+        # Every stored prediction carries all four version tags together --
+        # they only ever come from the one evaluation that actually backed
+        # this prediction (or none, for INTELLIGENCE_UNAVAILABLE), never
+        # mixed from separate sources.
+        model_version = evaluation.model_version if evaluation else None
         row = StoredPrediction(
             prediction_id=prediction_id,
             campus_id=campus_id,
@@ -297,10 +299,10 @@ class PredictionService:
             upper_bound=upper_bound,
             confidence=confidence,
             model_version=model_version,
-            dataset_version=None,
-            preprocessing_version=None,
-            feature_version=None,
-            evaluation_id=evaluation_id,
+            dataset_version=evaluation.dataset_version if evaluation else None,
+            preprocessing_version=evaluation.preprocessing_version if evaluation else None,
+            feature_version=evaluation.feature_version if evaluation else None,
+            evaluation_id=evaluation.evaluation_id if evaluation else None,
             feature_snapshot={k: (v if not hasattr(v, "item") else v.item()) for k, v in feature_snapshot.items()},
         )
         session.add(row)

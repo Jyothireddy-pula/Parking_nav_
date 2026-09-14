@@ -158,6 +158,9 @@ async def test_predict_with_enough_history_returns_a_bounded_estimate_and_update
     assert stored is not None
     assert stored.confidence == result.confidence
     assert stored.evaluation_id == "eval_toy_1"
+    assert stored.dataset_version == "toy-v1"
+    assert stored.preprocessing_version == "prep-v1"
+    assert stored.feature_version == "feat-v1"
 
 
 async def test_predict_with_stale_history_returns_data_stale(
