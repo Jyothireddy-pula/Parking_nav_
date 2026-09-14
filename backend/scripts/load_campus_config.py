@@ -12,6 +12,7 @@ from pathlib import Path
 
 from app.config_loader import ConfigValidationError, load_campus_config_file, upsert_campus_config
 from app.db import SessionLocal
+from app.services.digital_twin import DigitalTwinService
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CAMPUS_CONFIG_DIR = REPO_ROOT / "configs" / "campuses"
@@ -31,6 +32,7 @@ def _resolve_paths(names: list[str]) -> list[Path]:
 
 async def _load_all(paths: list[Path]) -> int:
     failures = 0
+    twin_service = DigitalTwinService()
     async with SessionLocal() as session:
         for path in paths:
             try:
@@ -42,6 +44,10 @@ async def _load_all(paths: list[Path]) -> int:
                     print(f"    - {error}", file=sys.stderr)
                 continue
             version = await upsert_campus_config(session, config)
+            # Seeds structural twin rows (gates/lots/roads) so the campus is
+            # immediately navigable; never touches any observation already
+            # recorded — see DigitalTwinService.init_campus.
+            await twin_service.init_campus(session, config.campus_id)
             print(f"[OK] {path}: campus {config.campus_id!r} loaded at configuration_version={version}")
     return failures
 

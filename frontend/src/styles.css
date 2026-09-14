@@ -12,3 +12,50 @@ h1 { max-width: 680px; margin: 2rem 0 1rem; font-family: "Space Grotesk", sans-s
 .status-dot--ok { background: #3f8b5d; }
 .status-dot--unreachable { background: #b4322f; }
 .admin-link { display: inline-block; margin-top: 2.5rem; color: #20302a; font-weight: 700; text-decoration-thickness: 2px; text-underline-offset: 0.3rem; }
+
+/* Navigation screen (Module 6) — mobile-first: map on top, panel below. */
+.nav-shell { display: flex; flex-direction: column; min-height: 100vh; background: #f4f1e9; }
+.nav-map { position: relative; height: 45vh; min-height: 280px; flex-shrink: 0; }
+.leaflet-container { width: 100%; height: 100%; }
+.layer-toggle {
+  position: absolute; z-index: 1000; top: 0.75rem; right: 0.75rem;
+  padding: 0.5rem 0.85rem; border: none; border-radius: 999px; background: #20302a; color: #fff;
+  font-size: 0.82rem; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.25); cursor: pointer;
+}
+.nav-panel { flex: 1; padding: 1.25rem 1.1rem 3rem; max-width: 640px; width: 100%; margin: 0 auto; }
+.nav-panel h1 { font-family: "Space Grotesk", sans-serif; font-size: 1.5rem; line-height: 1.2; margin: 0 0 1.25rem; }
+.nav-panel h2 { font-size: 0.95rem; font-weight: 700; margin: 0 0 0.5rem; color: #3a4a3f; }
+.nav-panel section { margin-bottom: 1.5rem; }
+.nav-panel label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85rem; color: #53645b; margin-top: 0.6rem; }
+.nav-panel select, .nav-panel input[type="text"], .nav-panel input[type="number"] {
+  font-size: 1rem; padding: 0.65rem 0.75rem; border-radius: 10px; border: 1px solid #d3cfc2; background: #fff;
+  min-height: 44px;
+}
+.nav-panel button { min-height: 44px; }
+.nav-panel button.primary {
+  width: 100%; background: #20302a; color: #fff; border: none; border-radius: 12px;
+  font-size: 1rem; font-weight: 700; padding: 0.85rem; cursor: pointer;
+}
+.nav-panel button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.geolocate button {
+  background: #eef0e8; border: 1px solid #c9cabb; border-radius: 10px; padding: 0.6rem 0.9rem;
+  font-size: 0.9rem; cursor: pointer;
+}
+.hint { font-size: 0.8rem; color: #7a8579; margin: 0.4rem 0 0; }
+.nav-error { color: #b4322f; font-size: 0.9rem; margin-top: 0.6rem; }
+.search-results { list-style: none; margin: 0.4rem 0 0; padding: 0; border: 1px solid #d3cfc2; border-radius: 10px; overflow: hidden; }
+.search-results li button {
+  display: block; width: 100%; text-align: left; padding: 0.65rem 0.85rem; background: #fff; border: none;
+  border-bottom: 1px solid #eee; font-size: 0.95rem; cursor: pointer;
+}
+.search-results li:last-child button { border-bottom: none; }
+.search-results li button.selected { background: #eef0e8; font-weight: 700; }
+.steps ol { padding-left: 1.2rem; margin: 0; }
+.steps li { margin-bottom: 0.5rem; font-size: 0.92rem; line-height: 1.4; }
+.report { background: #fff; border-radius: 14px; padding: 1rem; border: 1px solid #e5e1d3; }
+
+@media (min-width: 900px) {
+  .nav-shell { flex-direction: row; }
+  .nav-map { height: 100vh; flex: 1 1 60%; }
+  .nav-panel { flex: 1 1 40%; max-width: 480px; height: 100vh; overflow-y: auto; margin: 0; }
+}

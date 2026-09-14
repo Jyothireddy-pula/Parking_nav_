@@ -36,6 +36,15 @@ pip install -e ".[dev]"
 pytest
 ```
 
+## Navigation & wayfinding (Module 6) — checkpoint
+
+The frontend's home page (`frontend/src/Navigate.tsx`) is now a real Leaflet map — OpenStreetMap tiles by default, a satellite toggle, bounded/centered on VIT-AP's actual surveyed extent from Module 1B (not a guessed point) — with gate/destination/parking markers, live occupancy badges (green/orange/red, visually distinct when the reading is `STALE` vs `FRESH`), a gate picker with geolocation, destination search, and a "Report parking status" button posting to Module 4. Routes are drawn from the real road `geometry` (Module 1), concatenated leg by leg — never a straight line. Backend: `backend/app/services/navigation.py` builds an in-memory `networkx` graph per request from Module 1's `RouteEdge`s and Module 3's live closures; `GET /api/v1/campuses/{campus_id}/navigate/{route|nearest-parking|nearest-destination|search}` returns `409` with the standard error contract when no route exists, never a crash. Parking-to-destination is always two separate route legs (gate→lot, then lot→destination), matching how the frontend calls it.
+
+```powershell
+cd backend
+pytest tests/test_navigation.py tests/test_navigation_routes.py
+```
+
 ## Run locally
 
 Backend:
@@ -79,4 +88,6 @@ This starts PostgreSQL 16, the reload-enabled backend on port 8000, and the Vite
 
 ## Intentionally not implemented
 
-Live map integration, prediction, optimization/routing logic, admin authentication, and production deployment are intentionally deferred to later modules. Real VIT-AP GPS survey data (Module 1B), real field-collected manual counts (Module 2), a real PKLot/CNRPark-EXT training run, and a real VIT-AP `cv_calibration_reports` row (Module 5) all require physical fieldwork or large external downloads that haven't happened in this environment — the tooling for all of them is built and tested against synthetic/sample stand-ins, clearly labeled as such. No accuracy or real-world benefit is claimed beyond what's actually been measured.
+Prediction, optimization/routing beyond shortest-path, admin authentication, and production deployment are intentionally deferred to later modules. Real VIT-AP GPS survey data (Module 1B), real field-collected manual counts (Module 2), a real PKLot/CNRPark-EXT training run, and a real VIT-AP `cv_calibration_reports` row (Module 5) all require physical fieldwork or large external downloads that haven't happened in this environment — the tooling for all of them is built and tested against synthetic/sample stand-ins, clearly labeled as such. No accuracy or real-world benefit is claimed beyond what's actually been measured.
+
+Module 6's frontend was verified by building it (`tsc` + `vite build`, both clean), linting it, and exercising every API call it makes against a live backend instance with `vitap.yaml` loaded (see the commit history) — but it has not been opened in an actual browser in this environment, so in-browser interaction (map rendering, click targets, geolocation prompts) hasn't had visual/manual QA.

@@ -7,6 +7,7 @@ from app.models.event import Event
 from app.models.gate import Gate
 from app.models.parking_lot import ParkingLot
 from app.models.road import Road
+from app.models.route_edge import RouteEdge
 
 
 class CampusConfigRepository:
@@ -35,4 +36,10 @@ class CampusConfigRepository:
 
     async def list_events(self, session: AsyncSession, campus_id: str) -> list[Event]:
         result = await session.execute(select(Event).where(Event.campus_id == campus_id).order_by(Event.event_id))
+        return list(result.scalars().all())
+
+    async def list_route_edges(self, session: AsyncSession, campus_id: str) -> list[RouteEdge]:
+        result = await session.execute(
+            select(RouteEdge).where(RouteEdge.campus_id == campus_id).order_by(RouteEdge.route_edge_id)
+        )
         return list(result.scalars().all())
