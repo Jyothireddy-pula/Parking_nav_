@@ -221,8 +221,13 @@ class SimulationEngine:
         gate_closed_windows = [
             o for o in scenario.availability_overrides if o.entity_type == "gate" and o.status == "closed"
         ]
+        # A "restricted" lot is unavailable for new assignments the same as
+        # a "closed" one — a scenario shouldn't be able to route vehicles
+        # into a lot it has itself marked restricted for a window.
         lot_closed_windows = [
-            o for o in scenario.availability_overrides if o.entity_type == "parking_lot" and o.status == "closed"
+            o
+            for o in scenario.availability_overrides
+            if o.entity_type == "parking_lot" and o.status in ("closed", "restricted")
         ]
 
         def is_closed(windows: list, entity_id: str, minute: int) -> bool:

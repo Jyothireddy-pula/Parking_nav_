@@ -117,6 +117,32 @@ async def test_closed_parking_lot_is_never_assigned(
     assert result.metrics["overflow_count"] > 0
 
 
+async def test_restricted_parking_lot_receives_no_new_assignments(
+    db_session: AsyncSession, engine: SimulationEngine, sample_campus: str
+) -> None:
+    # "restricted" must be treated the same as "closed" for new
+    # assignments -- a scenario shouldn't be able to route vehicles into a
+    # lot it has itself marked restricted for a window.
+    scenario = _short_scenario(
+        duration_minutes=60,
+        availability_overrides=[
+            {
+                "entity_type": "parking_lot",
+                "entity_id": "sample-lot-1",
+                "status": "restricted",
+                "start_minute": 0,
+                "end_minute": 60,
+            }
+        ],
+    )
+
+    result = await engine.run(db_session, scenario, seed=7)
+
+    for entry in result.run_log:
+        assert entry["lot_occupied"]["sample-lot-1"] == 0
+    assert result.metrics["overflow_count"] > 0
+
+
 async def test_closed_gate_admits_no_new_arrivals(
     db_session: AsyncSession, engine: SimulationEngine, sample_campus: str
 ) -> None:
