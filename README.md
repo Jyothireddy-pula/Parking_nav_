@@ -121,6 +121,31 @@ cd ../ml
 pytest tests/test_prediction.py
 ```
 
+## Risk engine (Module 10)
+
+`backend/app/services/risk.py`'s `RiskEngine` converts Module 3's current
+state and Module 9's predictions into danger levels — never decides what
+to do about them. Five dimensions (overflow, gate queue, road congestion,
+search, and a weighted combined network risk), each a documented
+`raw_value / threshold` ratio banded LOW/MEDIUM/HIGH/CRITICAL by one
+shared policy. `is_proactive_trigger` fires the instant a 15-min
+*prediction*'s upper bound crosses the overflow threshold, even while
+current occupancy hasn't. A stale or unavailable prediction is always
+flagged (`available: false`, an explicit `reason`) rather than silently
+scored as a default risk level. See `docs/RISK.md` for the full design,
+including two honestly-documented simplifications (gate/road risk are
+campus-wide, and road congestion is `UNKNOWN` in every real run today
+since nothing populates road telemetry yet).
+
+```
+GET /api/v1/risk/{lot_id}?campus_id=<campus_id>
+```
+
+```powershell
+cd backend
+pytest tests/test_risk.py tests/test_risk_routes.py
+```
+
 ## Run locally
 
 Backend:
