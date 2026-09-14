@@ -10,11 +10,10 @@ name. All three here are baselines, not the optimizer:
   with room sorts first by lot_id. The floor every real strategy must beat.
 - B2 NearestAvailableLotStrategy: Module 7's original, using Module 6's real
   travel times.
-- B3 PredictionOnlyStrategy: a STUB. It load-balances on apparent_available
-  (the jittered occupancy signal already computed by the engine from
-  prediction_error_level) because no real prediction service exists yet.
-  Module 11 replaces its internals with actual predicted demand/availability
-  — the interface and registry key ("prediction_only") stay the same.
+- B3 PredictionOnlyStrategy: a stand-in for THIS synchronous, no-DB
+  simulation-loop context, permanently — see its own docstring below for
+  why Module 11's real prediction-backed B3 lives elsewhere
+  (app.services.optimization) instead of replacing this class.
 """
 
 from dataclasses import dataclass
@@ -72,14 +71,21 @@ class NearestAvailableLotStrategy:
 
 
 class PredictionOnlyStrategy:
-    """B3 baseline — STUB until Module 11 ships a real prediction service.
-
-    For now this load-balances on apparent_available (the same jittered
-    occupancy signal the engine already exposes to every strategy), picking
-    the candidate that appears to have the most room, ignoring travel time.
-    That is a deliberately simple stand-in, not a prediction: it exists so
-    the experiment runner has a third strategy to compare against B1/B2 and
-    so later modules can drop a real predictor in without changing callers.
+    """B3 baseline — a stand-in, permanently, for THIS simulation-loop
+    context. Module 11 shipped a real, Module-9-backed B3 (see
+    app.services.optimization.OptimizationEngine.recommend_baseline,
+    strategy="prediction_only") for the live/real system, and wired it as
+    the fourth comparison strategy alongside the actual multi-objective
+    optimizer. It could not replace THIS class's internals: Module 7's
+    simulation loop calls choose() synchronously, once per vehicle, with no
+    DB session and no connection to a trained model for synthetic scenario
+    data that was never observed by anything -- there is no real prediction
+    signal available here to use instead of apparent_available, the same
+    jittered occupancy signal every strategy already gets. So this keeps
+    load-balancing on apparent_available, picking the candidate that
+    appears to have the most room, ignoring travel time -- a deliberately
+    simple stand-in, not a prediction, kept for Module 7/8's simulation and
+    experiment runner.
     """
 
     def choose(self, context: AllocationContext) -> str | None:

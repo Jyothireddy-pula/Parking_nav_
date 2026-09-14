@@ -60,7 +60,7 @@ Four starter scenarios ship in `configs/scenarios/`: `normal_day`, `high_demand_
 
 ## Baseline strategies & experiment runner (Module 8)
 
-Three baseline `AllocationStrategy` implementations now exist in `backend/app/services/allocation.py`, all plugging into Module 7's unmodified engine: **B1** `FirstAvailableStrategy` (no intelligence — first lot with room, by lot_id), **B2** `NearestAvailableLotStrategy` (Module 7's original, shortest travel time), and **B3** `PredictionOnlyStrategy` — an explicit **stub**: it load-balances on the engine's existing apparent-availability signal because no real prediction service exists yet; Module 11 replaces its internals behind the same `prediction_only` registry key. None of the three is the real optimizer — that's a later module. All three are proven to never exceed a lot's capacity and never assign a closed/full/restricted lot (same guarantees Module 7 already tests, now exercised across all three).
+Three baseline `AllocationStrategy` implementations now exist in `backend/app/services/allocation.py`, all plugging into Module 7's unmodified engine: **B1** `FirstAvailableStrategy` (no intelligence — first lot with room, by lot_id), **B2** `NearestAvailableLotStrategy` (Module 7's original, shortest travel time), and **B3** `PredictionOnlyStrategy` — a permanent stand-in for this synchronous, DB-free simulation-loop context: it load-balances on the engine's existing apparent-availability signal, since there's no real prediction signal available inside a per-vehicle synchronous call over synthetic data nothing ever observed. Module 11 shipped a real, Module-9-backed B3 for the live system instead (`OptimizationEngine.recommend_baseline(strategy="prediction_only")`), wired as the fourth strategy alongside the actual optimizer — see `docs/OPTIMIZATION.md`. None of Module 8's three is the real optimizer. All three are proven to never exceed a lot's capacity and never assign a closed/full/restricted lot (same guarantees Module 7 already tests, now exercised across all three).
 
 `backend/app/services/experiment.py`'s `ExperimentRunner` runs one scenario across a strategy list x seed list grid — the same seed list for every strategy ("paired," so comparisons aren't skewed by different strategies facing different random demand; default 30 seeds, `0`-`29`). It aggregates each metric to mean / sample std-dev / 95% CI (a normal, `z=1.96`, approximation — no scipy dependency in this project, and that approximation is stated, not hidden). Results are stored in `experiment_runs` and never hand-edited; `/compare` and `/export` only reshape or flatten what's already stored, never recompute independently. This is the same runner Module 14 (ablation/robustness/scalability) will reuse.
 
@@ -144,6 +144,36 @@ GET /api/v1/risk/{lot_id}?campus_id=<campus_id>
 ```powershell
 cd backend
 pytest tests/test_risk.py tests/test_risk_routes.py
+```
+
+## Multi-objective optimization (Module 11)
+
+The project's core research contribution. `backend/app/services/optimization.py`'s
+`OptimizationEngine.recommend()` picks a parking lot by minimizing a
+weighted, normalized `J = w1*WaitingTime + w2*QueueCost + w3*SearchTravel
++ w4*UtilizationImbalance + w5*OverflowPenalty` over risk-adjusted
+PREDICTED state (Module 9 + Module 10), across three profiles (P1 Minimum
+Waiting, P2 Balanced [default], P3 Maximum Utilization — see
+`docs/OPTIMIZATION.md` for the exact weights). Infeasible candidates
+(closed/restricted/full lots, unavailable gates, blocked-road routes) are
+rejected structurally before any candidate is ever scored — a
+cheaper-looking infeasible option cannot be returned. No feasible option
+returns a documented result (`feasible=False`, a reason), never an
+exception. A stale/unavailable prediction falls back to a live
+historical-average (then current-state) estimate; scoring that exceeds a
+2-second hard limit falls back to nearest-available — both flagged
+explicitly in the result, never silent.
+
+Module 8's B3 `PredictionOnlyStrategy` stays a permanent stand-in for
+Module 7's synchronous, DB-free simulation loop (no real prediction signal
+is available there). Module 11 ships the real, Module-9-backed B3 for the
+live system instead (`recommend_baseline(strategy="prediction_only")`),
+wired as the fourth strategy alongside the optimizer itself
+(`compare()` runs all four together).
+
+```powershell
+cd backend
+pytest tests/test_optimization.py
 ```
 
 ## Run locally
