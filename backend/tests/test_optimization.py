@@ -316,6 +316,29 @@ async def test_compare_runs_all_four_strategies(db_session: AsyncSession, opt_ca
     assert all(r.feasible for r in results.values())
 
 
+# --- Module 9 is called exactly once per candidate, not twice ---
+
+
+async def test_scoring_calls_prediction_service_once_per_candidate(
+    db_session: AsyncSession, opt_campus: str, tmp_path: Path
+) -> None:
+    from sqlalchemy import func, select
+
+    from app.models.prediction import StoredPrediction
+
+    _register_fixed_model(tmp_path, LOT_A, point=8.0, lower=6.0, upper=10.0)
+    _register_fixed_model(tmp_path, LOT_B, point=90.0, lower=85.0, upper=95.0)
+    await _set_occupied(db_session, LOT_A, 8)
+    await _set_occupied(db_session, LOT_B, 90)
+    await _set_occupied(db_session, LOT_C, 100, status="closed")
+
+    await _engine(tmp_path).recommend(db_session, CAMPUS_ID, GATE_ID, profile="P2_BALANCED")
+
+    count = (await db_session.execute(select(func.count()).select_from(StoredPrediction))).scalar()
+    assert count == 2  # 2 feasible candidates -- would be 4 if RiskEngine and the
+    # optimizer's own predicted-occupancy lookup each fetched a separate prediction.
+
+
 # --- time limit exceeded -> nearest-available fallback ---
 
 

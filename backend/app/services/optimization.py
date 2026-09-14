@@ -294,8 +294,28 @@ class OptimizationEngine:
     async def _predicted_occupancy_pct(
         self, session: AsyncSession, campus_id: str, lot_id: str
     ) -> tuple[float | None, str]:
+        """Fetches its own prediction -- used by recommend_baseline's B3,
+        which needs exactly one standalone call. _score_candidates instead
+        uses _predicted_occupancy_pct_from_risk to reuse the prediction
+        RiskEngine.assess() already fetched, rather than calling Module 9
+        twice per candidate."""
+
         prediction = await self._prediction.predict(session, campus_id, lot_id, PREDICTION_HORIZON_MINUTES)
-        if prediction.point_estimate is not None and prediction.confidence not in (DATA_STALE, INTELLIGENCE_UNAVAILABLE):
+        return await self._resolve_predicted_pct(session, campus_id, lot_id, prediction)
+
+    async def _predicted_occupancy_pct_from_risk(
+        self, session: AsyncSession, campus_id: str, lot_id: str, risk
+    ) -> tuple[float | None, str]:
+        return await self._resolve_predicted_pct(session, campus_id, lot_id, risk.prediction)
+
+    async def _resolve_predicted_pct(
+        self, session: AsyncSession, campus_id: str, lot_id: str, prediction
+    ) -> tuple[float | None, str]:
+        if (
+            prediction is not None
+            and prediction.point_estimate is not None
+            and prediction.confidence not in (DATA_STALE, INTELLIGENCE_UNAVAILABLE)
+        ):
             lot_state = await self._twin.get_parking_state(session, lot_id)
             if lot_state is not None and lot_state.usable_capacity > 0:
                 return 100.0 * prediction.point_estimate / lot_state.usable_capacity, "model"
@@ -344,11 +364,18 @@ class OptimizationEngine:
         weights: dict[str, float],
         started: float,
     ) -> list[CandidateEvaluation] | None:
+        # One RiskEngine.assess() per candidate -- it already calls Module 9's
+        # predict() internally, so predicted_occupancy_pct is derived from
+        # that same call rather than fetching a second, separate prediction
+        # (which would double every StoredPrediction/twin write per candidate).
+        risks: dict[str, object] = {}
         predicted_pcts: dict[str, float] = {}
         for candidate in feasible:
             if time.monotonic() - started > TIME_LIMIT_SECONDS:
                 return None
-            pct, source = await self._predicted_occupancy_pct(session, campus_id, candidate.lot_id)
+            risk = await self._risk.assess(session, campus_id, candidate.lot_id)
+            risks[candidate.lot_id] = risk
+            pct, source = await self._predicted_occupancy_pct_from_risk(session, campus_id, candidate.lot_id, risk)
             candidate.predicted_occupancy_pct = pct
             candidate.prediction_source = source
             if pct is not None:
@@ -368,10 +395,7 @@ class OptimizationEngine:
 
         raw_terms: dict[str, ObjectiveTerms] = {}
         for candidate in feasible:
-            if time.monotonic() - started > TIME_LIMIT_SECONDS:
-                return None
-
-            risk = await self._risk.assess(session, campus_id, candidate.lot_id)
+            risk = risks[candidate.lot_id]
             queue_cost_raw = risk.overflow_risk.score if risk.overflow_risk.available else (
                 (candidate.predicted_occupancy_pct or 0.0) / 100.0
             )
