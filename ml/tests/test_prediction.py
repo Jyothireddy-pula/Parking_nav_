@@ -115,6 +115,26 @@ def test_leakage_check_catches_asof_not_before_target() -> None:
         check_no_leakage(df, [])
 
 
+def test_event_type_and_event_intensity_both_become_features_when_present() -> None:
+    ts = pd.date_range("2024-01-01", periods=40, freq="5min", tz="UTC")
+    raw = pd.DataFrame(
+        {
+            "lot_id": "lot-a",
+            "timestamp": ts,
+            "occupied": [50 + i for i in range(40)],
+            "capacity": 100,
+            "event_type": ["game_day" if i > 20 else None for i in range(40)],
+            "event_intensity": [1.5 if i > 20 else None for i in range(40)],
+        }
+    )
+    bucketed = bucket_to_5min(raw)
+    featured = build_features(bucketed, horizon_minutes=15)
+
+    assert "has_event_target" in featured.columns
+    assert "event_intensity_target" in featured.columns
+    assert set(featured["has_event_target"].unique()) <= {0.0, 1.0}
+
+
 def test_every_feature_in_the_registry_has_a_valid_lag_or_is_calendar() -> None:
     for name, lag in FEATURE_LAG_BUCKETS.items():
         assert lag >= 1, f"{name} has an invalid lag"

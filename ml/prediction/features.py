@@ -40,7 +40,7 @@ FEATURE_LAG_BUCKETS: dict[str, int] = {
     "rolling_std_6": 1,
     "gate_inflow_lag_1": 1,
 }
-CALENDAR_FEATURES: set[str] = {"hour", "day_of_week", "event_intensity_target"}
+CALENDAR_FEATURES: set[str] = {"hour", "day_of_week", "event_intensity_target", "has_event_target"}
 
 
 def bucket_to_5min(df: pd.DataFrame) -> pd.DataFrame:
@@ -115,6 +115,13 @@ def build_features(bucketed: pd.DataFrame, horizon_minutes: int, require_target:
             # event is known in advance, so this describes target_ts, not a
             # past reading, and carries no lag.
             feat["event_intensity_target"] = group["event_intensity"].shift(-horizon_buckets)
+        if "event_type" in group.columns:
+            # Whether *any* event is active in the target window -- same
+            # "known in advance" reasoning as event_intensity_target. Not a
+            # per-category one-hot: this dataset has no fixed event-type
+            # vocabulary to encode against, so this is deliberately a
+            # coarse presence signal rather than inventing categories.
+            feat["has_event_target"] = group["event_type"].shift(-horizon_buckets).notna().astype(float)
 
         feat["target_ts"] = group["timestamp"].shift(-horizon_buckets)
         feat["target"] = group["occupied"].shift(-horizon_buckets)
