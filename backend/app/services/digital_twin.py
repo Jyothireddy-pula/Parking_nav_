@@ -171,6 +171,24 @@ class DigitalTwinService:
         await session.commit()
         return await self._twin.get_parking_state(session, lot_id)
 
+    async def set_predicted_occupancy(
+        self, session: AsyncSession, campus_id: str, lot_id: str, predicted_occupancy: float
+    ) -> ParkingState:
+        """Module 9: write a forecast into the twin without touching the
+        live `occupied` observation or its source/provenance/timestamp — a
+        prediction is not a new observation of the present, just a stored
+        forecast alongside it."""
+
+        await self._require_campus(session, campus_id)
+        row = await self._twin.get_parking_state(session, lot_id)
+        if row is None or row.campus_id != campus_id:
+            raise EntityNotFoundError("parking_lot", lot_id)
+
+        row.predicted_occupancy = predicted_occupancy
+        await session.merge(row)
+        await session.commit()
+        return await self._twin.get_parking_state(session, lot_id)
+
     async def update_gate(
         self,
         session: AsyncSession,

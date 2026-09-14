@@ -7,6 +7,7 @@ from app.models.experiment import ExperimentRun
 from app.models.gate import Gate
 from app.models.ingestion import IngestionBatch, Observation, ObservationRaw, ObservationRejected
 from app.models.parking_lot import ParkingLot
+from app.models.prediction import PredictionEvaluation, StoredPrediction
 from app.models.road import Road
 from app.models.route_edge import RouteEdge
 from app.models.simulation import SimulationRun
@@ -35,10 +36,12 @@ __all__ = [
     "ObservationRejected",
     "ParkingLot",
     "ParkingState",
+    "PredictionEvaluation",
     "Road",
     "RoadState",
     "RouteEdge",
     "SimulationRun",
+    "StoredPrediction",
     "TwinSnapshot",
     "VehicleState",
 ]

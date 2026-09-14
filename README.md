@@ -8,6 +8,8 @@ Campus parking platform. MODULE 0 built the application shell and API foundation
 - `backend/`: FastAPI API with routes -> services -> repositories -> database layering.
 - `configs/campuses/`: one YAML file per campus, loaded idempotently via `backend/scripts/load_campus_config.py`.
 - `ml/cv/`: Module 5's occupancy classifier, space-polygon annotation, calibration, and camera pipeline. See `docs/CV.md`.
+- `ml/prediction/`: Module 9's data prep + model training pipeline (HistoricalAverage/MovingAverage/XGBoost). See `docs/PREDICTION.md`.
+- `prediction/`: Module 9's real-VIT-AP-data training CLI (`train_real.py`), at the repo root like `simulation/` since it needs both the backend and ml packages.
 - `simulation/`, `optimization/`: reserved module boundaries.
 - `data/{raw,processed,sample,external}/`: provenance-scoped data locations.
 - `experiments/`, `tests/`, `docs/`, `docker/`: reserved foundation locations.
@@ -72,6 +74,51 @@ GET    /api/v1/experiments/{experiment_id}/export    # raw per-(strategy, seed) 
 ```powershell
 cd backend
 pytest tests/test_experiment.py tests/test_experiment_routes.py
+```
+
+## Prediction engine (Module 9)
+
+`ml/prediction/` — a combined data-prep + training pipeline (never run as
+separately-drifting stages): 5-min bucketing, lag/rolling/calendar feature
+engineering with a per-feature lag registry, an automated leakage check
+(`ml/prediction/leakage.py`), chronological train/val/test split, and three
+models trained per horizon (15-min, 30-min): HistoricalAverage, MovingAverage,
+and XGBoost (config-driven hyperparameters, native quantile regression for
+prediction intervals). Every stored evaluation/prediction carries
+model/dataset/preprocessing/feature versions. See `docs/PREDICTION.md` for
+the full design and a **measured** report from two real runs done in this
+session: bootstrapping against the EXTERNAL UCI "Parking Birmingham"
+dataset (XGBoost MAE 48.11 spaces at 15-min horizon, vs. 136.44 for the
+historical-average baseline — see the doc for the full table), and a real
+run against VIT-AP's actual `observations` table, which honestly reported
+0 real rows and trained nothing (no physical field data collection has
+happened yet) — the two are never blended.
+
+`backend/app/services/prediction.py`'s `PredictionService` serves
+`POST /api/v1/predict` — given `{campus_id, parking_lot_id, horizon_minutes}`
+it loads a trained model (`FileModelRegistry`, reading whatever a training
+run wrote to `PARKINGNAVX_PREDICTION_MODEL_DIR`), builds live features from
+Module 4's recent real observations, and returns
+`{point_estimate, lower_bound, upper_bound, model_version, confidence}`
+where `confidence` is `HIGH`/`MODERATE`/`LOW` (banded on the model's own
+measured MAE relative to the lot's capacity — a documented starting
+policy, same shape as Module 5's CV promotion threshold, not yet
+validated against real error), `DATA_STALE` (the underlying observation
+data is STALE/UNKNOWN per Module 3's freshness rule — still computed, just
+caveated), or `INTELLIGENCE_UNAVAILABLE` (no trained model, or not enough
+recent real data to build its input features) — this project's version of
+"missing is missing," never a guessed number. Every prediction updates
+Module 3's twin `predicted_occupancy` for that lot.
+
+```powershell
+cd ml
+python -m prediction.train_external --cache-dir ../data/external/uci_parking_birmingham
+cd ..
+python prediction/train_real.py --campus-id vitap
+cd backend
+pytest tests/test_prediction.py tests/test_prediction_routes.py
+cd ../ml
+pytest tests/test_prediction.py
 ```
 
 ## Run locally

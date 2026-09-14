@@ -14,6 +14,7 @@ from app.routes.experiment import router as experiment_router
 from app.routes.health import router as health_router
 from app.routes.ingestion import router as ingestion_router
 from app.routes.navigation import router as navigation_router
+from app.routes.prediction import router as prediction_router
 from app.routes.twin import router as twin_router
 
 settings = get_settings()
@@ -63,3 +64,4 @@ app.include_router(ingestion_router, prefix="/api/v1")
 app.include_router(cv_calibration_router, prefix="/api/v1")
 app.include_router(navigation_router, prefix="/api/v1")
 app.include_router(experiment_router, prefix="/api/v1")
+app.include_router(prediction_router, prefix="/api/v1")

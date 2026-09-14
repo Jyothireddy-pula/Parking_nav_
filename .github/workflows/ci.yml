@@ -16,6 +16,11 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install .[dev]
+        # Module 9's PredictionService imports ml/prediction (feature
+        # building) at request time; backend/tests/test_prediction.py
+        # imports it directly too -- both packages share one environment
+        # here, same as this repo's local shared .venv.
+      - run: pip install -e ../ml
       - run: ruff check .
       - run: pytest
 

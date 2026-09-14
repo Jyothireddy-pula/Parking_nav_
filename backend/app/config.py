@@ -9,6 +9,11 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://parkingnavx:parkingnavx@localhost:5432/parkingnavx"
     log_level: str = "INFO"
     cors_origins: str = "http://localhost:5173"
+    # Where Module 9 trained model artifacts (model.joblib + evaluation.json
+    # per campus/lot/horizon) are read from. Nothing here is ever written by
+    # the API itself -- only training scripts (ml/prediction/train_external.py,
+    # prediction/train_real.py) produce these files.
+    prediction_model_dir: str = "../ml/artifacts/predictions"
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="PARKINGNAVX_", extra="ignore")
 
