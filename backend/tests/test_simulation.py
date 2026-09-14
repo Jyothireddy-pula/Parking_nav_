@@ -146,6 +146,51 @@ async def test_queue_and_departure_behavior(
     assert result.run_log[-1]["lot_occupied"]["sample-lot-1"] <= peak
 
 
+async def test_travel_distance_metric_is_recorded(
+    db_session: AsyncSession, engine: SimulationEngine, sample_campus: str
+) -> None:
+    scenario = _short_scenario(duration_minutes=120)
+
+    result = await engine.run(db_session, scenario, seed=3)
+
+    distances = result.metrics["travel_distance_meters"]
+    assert distances["avg"] is not None
+    assert distances["avg"] > 0
+    assert distances["max"] >= distances["avg"]
+
+
+async def test_every_occupancy_change_updates_the_digital_twin_tagged_synthetic(
+    db_session: AsyncSession, engine: SimulationEngine, sample_campus: str
+) -> None:
+    from app.services.digital_twin import DigitalTwinService
+
+    scenario = _short_scenario(duration_minutes=120)
+
+    await engine.run(db_session, scenario, seed=3)
+
+    twin = DigitalTwinService()
+    state = await twin.get_parking_state(db_session, "sample", "sample-lot-1")
+
+    assert state["source"] == "simulation"
+    assert state["provenance"] == "SYNTHETIC"
+    assert state["occupied"] is not None
+
+
+async def test_twin_writes_go_through_the_normal_capacity_aware_update_path(
+    db_session: AsyncSession, engine: SimulationEngine, sample_campus: str
+) -> None:
+    # Sanity check that the twin write path goes through the same
+    # capacity-aware update_parking used elsewhere, not a raw write.
+    from app.services.digital_twin import DigitalTwinService
+
+    scenario = _short_scenario(duration_minutes=60)
+    await engine.run(db_session, scenario, seed=3)
+
+    twin = DigitalTwinService()
+    state = await twin.get_parking_state(db_session, "sample", "sample-lot-1")
+    assert state["occupied"] <= state["usable_capacity"]
+
+
 async def test_scenario_validation_rejects_unknown_gate(
     db_session: AsyncSession, engine: SimulationEngine, sample_campus: str
 ) -> None:

@@ -9,12 +9,23 @@ against the same AllocationStrategy interface.
 Every value this module produces is provenance SYNTHETIC: scenario
 demand, arrival rates, and parked-duration sampling are all simulator
 inputs/assumptions, never measured facts.
+
+A run writes its lot-occupancy changes into Module 3's Digital Twin
+(source="simulation", provenance="SYNTHETIC") as they happen, per the
+spec. Known limitation this creates: the twin holds one current state
+per campus_id, not one per simulation run, so running a simulation
+against a campus that is simultaneously receiving real Module 4
+ingestion will visibly (if distinguishably, via source/provenance)
+overwrite that campus's live occupancy with simulated numbers for the
+duration of the run. Run simulations against a non-live campus_id
+(e.g. "sample") until a later module adds run-scoped twin isolation.
 """
 
+import logging
 import math
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from random import Random
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,7 +41,10 @@ from app.services.allocation import (
     NearestAvailableLotStrategy,
 )
 from app.services.campus_config import CampusNotFoundError
+from app.services.digital_twin import CapacityExceededError, DigitalTwinService, EntityNotFoundError
 from app.services.navigation import DRIVE, NavigationService, NoFeasibleRouteError
+
+logger = logging.getLogger(__name__)
 
 VEHICLE_STATES = ("approaching", "searching", "assigned", "parked", "leaving", "completed")
 
@@ -71,6 +85,7 @@ class _Vehicle:
     leave_minute: int | None = None
     departed_minute: int | None = None
     travel_time_s: float = 0.0
+    travel_distance_m: float = 0.0
     outcome: str | None = None  # "parked" | "overflow"
 
 
@@ -112,9 +127,11 @@ class SimulationEngine:
         self,
         config_repository: CampusConfigRepository | None = None,
         navigation_service: NavigationService | None = None,
+        twin_service: DigitalTwinService | None = None,
     ) -> None:
         self._config = config_repository or CampusConfigRepository()
         self._navigation = navigation_service or NavigationService()
+        self._twin = twin_service or DigitalTwinService()
 
     async def validate(self, session: AsyncSession, scenario: ScenarioConfig) -> None:
         campus = await self._config.get_campus(session, scenario.campus_id)
@@ -129,17 +146,20 @@ class SimulationEngine:
         if errors:
             raise ScenarioValidationFailedError(errors)
 
-    async def _travel_time_table(
+    async def _travel_table(
         self, session: AsyncSession, campus_id: str, gate_ids: list[str], lot_ids: list[str]
-    ) -> dict[str, dict[str, float]]:
-        table: dict[str, dict[str, float]] = {gate_id: {} for gate_id in gate_ids}
+    ) -> dict[str, dict[str, tuple[float, float]]]:
+        """gate_id -> lot_id -> (travel_time_s, distance_m), from Module 6's
+        real routing — never guessed."""
+
+        table: dict[str, dict[str, tuple[float, float]]] = {gate_id: {} for gate_id in gate_ids}
         for gate_id in gate_ids:
             for lot_id in lot_ids:
                 try:
                     route = await self._navigation.find_route(session, campus_id, gate_id, lot_id, DRIVE)
                 except NoFeasibleRouteError:
                     continue
-                table[gate_id][lot_id] = route.travel_time_s
+                table[gate_id][lot_id] = (route.travel_time_s, route.distance_m)
         return table
 
     async def run(
@@ -154,13 +174,39 @@ class SimulationEngine:
         effective_seed = scenario.seed if seed is None else seed
         rng = Random(effective_seed)
         strategy = strategy or NearestAvailableLotStrategy()
+        # Ensures every lot has a twin row to update; never touches an
+        # existing real observation (see DigitalTwinService.init_campus).
+        await self._twin.init_campus(session, scenario.campus_id)
+        sim_clock_start = datetime.now(timezone.utc)
+
+        async def record_twin_update(lot_state: "_LotState", minute: int) -> None:
+            try:
+                await self._twin.update_parking(
+                    session,
+                    scenario.campus_id,
+                    lot_state.lot_id,
+                    occupied=lot_state.reserved_or_occupied,
+                    source="simulation",
+                    provenance="SYNTHETIC",
+                    observation_timestamp=sim_clock_start + timedelta(minutes=minute),
+                )
+            except (EntityNotFoundError, CapacityExceededError) as exc:
+                # A scenario's capacity_override can raise the lot above (or
+                # keep it below) the twin's config-seeded total_capacity;
+                # either way the simulation's own bookkeeping (lot_states,
+                # the hard capacity-never-exceeded guarantee) is authoritative
+                # for this run — a twin sync miss doesn't invalidate it.
+                logger.warning(
+                    "simulation twin sync skipped",
+                    extra={"campus_id": scenario.campus_id, "lot_id": lot_state.lot_id, "reason": str(exc)},
+                )
 
         gates = sorted(await self._config.list_gates(session, scenario.campus_id), key=lambda g: g.gate_id)
         lots = sorted(await self._config.list_parking_lots(session, scenario.campus_id), key=lambda p: p.parking_lot_id)
         gate_ids = [g.gate_id for g in gates]
         lot_ids = [lot.parking_lot_id for lot in lots]
 
-        travel_table = await self._travel_time_table(session, scenario.campus_id, gate_ids, lot_ids)
+        travel_table = await self._travel_table(session, scenario.campus_id, gate_ids, lot_ids)
 
         capacity_overrides = {o.parking_lot_id: o for o in scenario.capacity_overrides}
         lot_states: dict[str, _LotState] = {}
@@ -226,7 +272,7 @@ class SimulationEngine:
                     vehicle.queue_exit_minute = minute
 
                     candidates = []
-                    for lot_id, travel_time_s in sorted(travel_table.get(gate.gate_id, {}).items()):
+                    for lot_id, (travel_time_s, _distance_m) in sorted(travel_table.get(gate.gate_id, {}).items()):
                         if is_closed(lot_closed_windows, lot_id, minute):
                             continue
                         lot_state = lot_states[lot_id]
@@ -247,7 +293,8 @@ class SimulationEngine:
                     vehicle.state = "assigned"
                     vehicle.assigned_minute = minute
                     vehicle.assigned_lot_id = chosen
-                    vehicle.travel_time_s = travel_table[gate.gate_id][chosen]
+                    vehicle.travel_time_s, vehicle.travel_distance_m = travel_table[gate.gate_id][chosen]
+                    await record_twin_update(lot_state, minute)
                     arrival_at_lot = minute + max(1, round(vehicle.travel_time_s / 60))
                     arrivals_at_lot.setdefault(arrival_at_lot, []).append(vehicle)
 
@@ -263,9 +310,11 @@ class SimulationEngine:
             # 4. Departures.
             for vehicle in departures.pop(minute, []):
                 vehicle.state = "leaving"
-                lot_states[vehicle.assigned_lot_id].reserved_or_occupied -= 1
+                lot_state = lot_states[vehicle.assigned_lot_id]
+                lot_state.reserved_or_occupied -= 1
                 vehicle.state = "completed"
                 vehicle.departed_minute = minute
+                await record_twin_update(lot_state, minute)
 
             run_log.append(
                 {
@@ -305,6 +354,7 @@ class SimulationEngine:
             if v.assigned_minute is not None and v.queue_exit_minute is not None
         ]
         travel_times_s = [v.travel_time_s for v in vehicles if v.outcome == "parked"]
+        travel_distances_m = [v.travel_distance_m for v in vehicles if v.outcome == "parked"]
 
         utilization_by_lot = {}
         for lot_id in lot_ids:
@@ -339,6 +389,10 @@ class SimulationEngine:
             "travel_time_seconds": {
                 "avg": round(sum(travel_times_s) / len(travel_times_s), 1) if travel_times_s else None,
                 "max": max(travel_times_s) if travel_times_s else None,
+            },
+            "travel_distance_meters": {
+                "avg": round(sum(travel_distances_m) / len(travel_distances_m), 1) if travel_distances_m else None,
+                "max": max(travel_distances_m) if travel_distances_m else None,
             },
             "max_gate_queue_length": max_queue_by_gate,
             "utilization_by_lot": utilization_by_lot,
