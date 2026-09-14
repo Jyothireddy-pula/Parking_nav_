@@ -3,6 +3,7 @@ from app.models.campus import Campus
 from app.models.cv_calibration import CvCalibrationReport
 from app.models.destination import Destination
 from app.models.event import Event
+from app.models.experiment import ExperimentRun
 from app.models.gate import Gate
 from app.models.ingestion import IngestionBatch, Observation, ObservationRaw, ObservationRejected
 from app.models.parking_lot import ParkingLot
@@ -25,6 +26,7 @@ __all__ = [
     "CvCalibrationReport",
     "Destination",
     "Event",
+    "ExperimentRun",
     "Gate",
     "GateState",
     "IngestionBatch",

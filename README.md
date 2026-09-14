@@ -56,6 +56,24 @@ python simulation/run.py --scenario configs/scenarios/high_demand_event.yaml --s
 
 Four starter scenarios ship in `configs/scenarios/`: `normal_day`, `high_demand_event`, `parking_closure`, `gate_closure` — all against the `sample` campus.
 
+## Baseline strategies & experiment runner (Module 8)
+
+Three baseline `AllocationStrategy` implementations now exist in `backend/app/services/allocation.py`, all plugging into Module 7's unmodified engine: **B1** `FirstAvailableStrategy` (no intelligence — first lot with room, by lot_id), **B2** `NearestAvailableLotStrategy` (Module 7's original, shortest travel time), and **B3** `PredictionOnlyStrategy` — an explicit **stub**: it load-balances on the engine's existing apparent-availability signal because no real prediction service exists yet; Module 11 replaces its internals behind the same `prediction_only` registry key. None of the three is the real optimizer — that's a later module. All three are proven to never exceed a lot's capacity and never assign a closed/full/restricted lot (same guarantees Module 7 already tests, now exercised across all three).
+
+`backend/app/services/experiment.py`'s `ExperimentRunner` runs one scenario across a strategy list x seed list grid — the same seed list for every strategy ("paired," so comparisons aren't skewed by different strategies facing different random demand; default 30 seeds, `0`-`29`). It aggregates each metric to mean / sample std-dev / 95% CI (a normal, `z=1.96`, approximation — no scipy dependency in this project, and that approximation is stated, not hidden). Results are stored in `experiment_runs` and never hand-edited; `/compare` and `/export` only reshape or flatten what's already stored, never recompute independently. This is the same runner Module 14 (ablation/robustness/scalability) will reuse.
+
+```
+POST   /api/v1/experiments                    {"scenario": {...}, "strategies": ["first_available", "nearest_available", "prediction_only"], "seeds": [0, 1, ...]}
+GET    /api/v1/experiments/{experiment_id}
+GET    /api/v1/experiments/{experiment_id}/compare   # same aggregates, reshaped {metric: {strategy: stats}}
+GET    /api/v1/experiments/{experiment_id}/export    # raw per-(strategy, seed) rows as CSV
+```
+
+```powershell
+cd backend
+pytest tests/test_experiment.py tests/test_experiment_routes.py
+```
+
 ## Run locally
 
 Backend:

@@ -1,10 +1,12 @@
 """Module 7 — vehicle & parking discrete-time simulation.
 
-Explicitly NOT the optimizer (Module 8): the only allocation strategy
-shipped here (NearestAvailableLotStrategy, app.services.allocation) is a
-placeholder good enough to make the engine runnable and testable. The
-engine itself is strategy-agnostic — Module 8 plugs in real strategies
-against the same AllocationStrategy interface.
+Explicitly NOT the optimizer: the engine is strategy-agnostic and accepts
+any AllocationStrategy (app.services.allocation). Module 7 shipped
+NearestAvailableLotStrategy as a placeholder; Module 8 adds two more
+baselines (FirstAvailableStrategy, PredictionOnlyStrategy) plus the
+ExperimentRunner that runs this engine across scenario x strategy x seed
+grids. None of these baselines is the real optimizer — that's still a
+later module.
 
 Every value this module produces is provenance SYNTHETIC: scenario
 demand, arrival rates, and parked-duration sampling are all simulator
@@ -368,9 +370,11 @@ class SimulationEngine:
             }
 
         max_queue_by_gate: dict[str, int] = {}
+        all_queue_samples: list[int] = []
         for entry in run_log:
             for gate_id, length in entry["gate_queue_lengths"].items():
                 max_queue_by_gate[gate_id] = max(max_queue_by_gate.get(gate_id, 0), length)
+                all_queue_samples.append(length)
 
         return {
             "vehicles_total": len(vehicles),
@@ -389,12 +393,18 @@ class SimulationEngine:
             "travel_time_seconds": {
                 "avg": round(sum(travel_times_s) / len(travel_times_s), 1) if travel_times_s else None,
                 "max": max(travel_times_s) if travel_times_s else None,
+                "total": round(sum(travel_times_s), 1) if travel_times_s else 0.0,
             },
             "travel_distance_meters": {
                 "avg": round(sum(travel_distances_m) / len(travel_distances_m), 1) if travel_distances_m else None,
                 "max": max(travel_distances_m) if travel_distances_m else None,
+                "total": round(sum(travel_distances_m), 1) if travel_distances_m else 0.0,
             },
             "max_gate_queue_length": max_queue_by_gate,
+            "gate_queue_length": {
+                "avg": round(sum(all_queue_samples) / len(all_queue_samples), 2) if all_queue_samples else None,
+                "max": max(all_queue_samples) if all_queue_samples else None,
+            },
             "utilization_by_lot": utilization_by_lot,
         }
 
