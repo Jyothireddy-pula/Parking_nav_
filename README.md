@@ -45,6 +45,17 @@ cd backend
 pytest tests/test_navigation.py tests/test_navigation_routes.py
 ```
 
+## Vehicle & parking simulation (Module 7)
+
+A discrete-time (1-minute step) engine (`backend/app/services/simulation.py`) runs a SYNTHETIC scenario — arrivals, an event demand multiplier, gate/lot/road closures, capacity overrides, all validated against a real campus's gate/lot/road IDs — through the vehicle lifecycle (`approaching → searching → assigned → parked → leaving → completed`, the same states Module 3 uses). It calls Module 6's routing for real gate→lot travel times and an explicitly pluggable `AllocationStrategy` (`backend/app/services/allocation.py`) to pick a lot; the only strategy shipped here, `NearestAvailableLotStrategy`, is a placeholder — the real optimizer is Module 8's job. Same scenario + seed always produces identical output (tested), a lot's occupancy never exceeds its capacity (tested, under stress), and a closed gate/lot is never assigned to (tested). Results are stored in `simulation_runs` and printed by the CLI.
+
+```powershell
+python simulation/run.py --scenario configs/scenarios/normal_day.yaml
+python simulation/run.py --scenario configs/scenarios/high_demand_event.yaml --seed 99
+```
+
+Four starter scenarios ship in `configs/scenarios/`: `normal_day`, `high_demand_event`, `parking_closure`, `gate_closure` — all against the `sample` campus.
+
 ## Run locally
 
 Backend:

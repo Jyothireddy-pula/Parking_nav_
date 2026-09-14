@@ -1,0 +1,27 @@
+# SYNTHETIC scenario for the `sample` development campus. Every number
+# here is a simulator input/assumption, not a measured fact — see
+# ScenarioConfig.label.
+#
+# Only sample-gate-main is used: in sample.yaml's road graph, driving
+# routes only exist gate-main<->lot and gate-north<->library (two
+# disconnected driving components), so gate-north has no drivable path
+# to the lot at all. Using it here would just guarantee 100% overflow
+# for that gate, which isn't what this scenario is demonstrating.
+scenario_id: normal_day
+campus_id: sample
+name: Normal weekday traffic
+description: Steady, moderate arrivals across a 3-hour window. No closures, no events.
+label: SYNTHETIC
+duration_minutes: 180
+seed: 42
+prediction_error_level: 0.0
+
+arrival_rate_profile:
+  - gate_id: sample-gate-main
+    start_minute: 0
+    end_minute: 180
+    vehicles_per_minute: 0.4
+
+event_conditions: []
+availability_overrides: []
+capacity_overrides: []

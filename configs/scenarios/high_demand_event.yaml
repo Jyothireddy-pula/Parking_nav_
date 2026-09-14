@@ -1,0 +1,28 @@
+# SYNTHETIC scenario. demand_multiplier is an explicit ASSUMPTION about
+# how much an event inflates arrivals — never a measured fact.
+scenario_id: high_demand_event
+campus_id: sample
+name: Orientation-day style demand spike
+description: >
+  Normal background arrivals for the first and last hour, a 4x demand
+  multiplier during a 1-hour "event" window in the middle — expected to
+  push the lot toward capacity and produce overflow.
+label: SYNTHETIC
+duration_minutes: 180
+seed: 7
+prediction_error_level: 0.0
+
+arrival_rate_profile:
+  - gate_id: sample-gate-main
+    start_minute: 0
+    end_minute: 180
+    vehicles_per_minute: 0.4
+
+event_conditions:
+  - name: orientation_rush
+    start_minute: 60
+    end_minute: 120
+    demand_multiplier: 4.0
+
+availability_overrides: []
+capacity_overrides: []

@@ -1,0 +1,29 @@
+# SYNTHETIC scenario: sample-gate-main closed for an hour. No vehicles
+# can enter through it during that window (they simply don't arrive —
+# there's no "waiting outside" state modeled), so arrivals should be
+# zero for that stretch and resume after.
+scenario_id: gate_closure
+campus_id: sample
+name: Main gate closure
+description: sample-gate-main closed 60-120 minutes in (maintenance-style closure).
+label: SYNTHETIC
+duration_minutes: 180
+seed: 19
+prediction_error_level: 0.0
+
+arrival_rate_profile:
+  - gate_id: sample-gate-main
+    start_minute: 0
+    end_minute: 180
+    vehicles_per_minute: 0.4
+
+event_conditions: []
+
+availability_overrides:
+  - entity_type: gate
+    entity_id: sample-gate-main
+    status: closed
+    start_minute: 60
+    end_minute: 120
+
+capacity_overrides: []

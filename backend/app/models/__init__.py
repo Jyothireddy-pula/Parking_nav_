@@ -8,6 +8,7 @@ from app.models.ingestion import IngestionBatch, Observation, ObservationRaw, Ob
 from app.models.parking_lot import ParkingLot
 from app.models.road import Road
 from app.models.route_edge import RouteEdge
+from app.models.simulation import SimulationRun
 from app.models.twin import (
     CampusState,
     GateState,
@@ -35,6 +36,7 @@ __all__ = [
     "Road",
     "RoadState",
     "RouteEdge",
+    "SimulationRun",
     "TwinSnapshot",
     "VehicleState",
 ]

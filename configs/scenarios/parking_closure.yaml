@@ -1,0 +1,30 @@
+# SYNTHETIC scenario: sample-lot-1 (the only lot reachable by driving
+# from sample-gate-main) is closed for an hour in the middle of the run.
+# Every arrival during that window must overflow — there is nowhere
+# else for it to go — which is exactly what this scenario is for:
+# proving closed entities are never assigned, even under pressure.
+scenario_id: parking_closure
+campus_id: sample
+name: Midday lot closure
+description: sample-lot-1 closed 60-120 minutes in (maintenance-style closure).
+label: SYNTHETIC
+duration_minutes: 180
+seed: 11
+prediction_error_level: 0.0
+
+arrival_rate_profile:
+  - gate_id: sample-gate-main
+    start_minute: 0
+    end_minute: 180
+    vehicles_per_minute: 0.4
+
+event_conditions: []
+
+availability_overrides:
+  - entity_type: parking_lot
+    entity_id: sample-lot-1
+    status: closed
+    start_minute: 60
+    end_minute: 120
+
+capacity_overrides: []
